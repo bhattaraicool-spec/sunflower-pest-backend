@@ -183,7 +183,14 @@ async function initSheets() {
     return;
   }
   try {
-    const creds = JSON.parse(credsEnv);
+    // Render and some hosts expand \n inside env var values into real newlines,
+    // which breaks JSON.parse. Try as-is first; if that fails, re-escape newlines.
+    let creds;
+    try {
+      creds = JSON.parse(credsEnv);
+    } catch (_) {
+      creds = JSON.parse(credsEnv.replace(/\n/g, '\\n'));
+    }
     const auth  = new google.auth.GoogleAuth({
       credentials: creds,
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
