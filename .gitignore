@@ -1,0 +1,14 @@
+node_modules/
+.env
+/data/
+*.db
+*.db-shm
+*.db-wal
+*.bin
+database.sqlite
+database.bin
+.DS_Store
+*/.DS_Store
+"* (*).html"
+* (*).html
+* (*).md

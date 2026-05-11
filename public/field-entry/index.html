@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pest Monitoring — Field Data Entry</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --blue: #3B4BA8;
+    --blue-light: #eef0fb;
+    --green: #16a34a;
+    --gold: #E8A020;
+    --bg: #f4f5f9;
+    --border: #dde0ec;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --form-w: 318px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* HEADER */
+  header {
+    background: white; border-bottom: 1px solid var(--border);
+    padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+    height: 50px; flex-shrink: 0;
+  }
+  .header-icon { font-size: 20px; }
+  header h1 { font-size: 15px; font-weight: 600; color: var(--blue); }
+  header p { font-size: 11px; color: var(--muted); }
+  .header-link { margin-left: auto; font-size: 12px; color: var(--blue); text-decoration: none; font-weight: 500; }
+  .header-link:hover { text-decoration: underline; }
+
+  /* LAYOUT */
+  .layout { display: flex; flex: 1; overflow: hidden; }
+
+  /* FORM PANEL */
+  .form-panel {
+    width: var(--form-w); background: white; border-right: 1px solid var(--border);
+    overflow-y: auto; flex-shrink: 0; padding: 0 0 20px 0;
+  }
+
+  .section-header {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--blue);
+    text-transform: uppercase; padding: 14px 16px 6px; border-bottom: 2px solid var(--blue);
+    margin-bottom: 12px;
+  }
+  .form-body { padding: 0 16px; }
+  .field { margin-bottom: 13px; }
+  .field label { display: block; font-size: 11px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .field label .req { color: #ef4444; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 8px 10px; border: 1.5px solid var(--border);
+    border-radius: 7px; font-size: 12px; font-family: inherit; color: var(--text);
+    background: white; transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none; border-color: var(--blue);
+  }
+  .field input::placeholder, .field textarea::placeholder { color: #adb5bd; }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .toggle-row { display: flex; gap: 6px; }
+  .toggle-btn {
+    flex: 1; padding: 7px; border: 1.5px solid var(--border); border-radius: 7px;
+    font-size: 12px; font-weight: 500; cursor: pointer; background: white;
+    font-family: inherit; transition: all 0.2s;
+  }
+  .toggle-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+
+  .btn-location {
+    width: 100%; padding: 9px; background: var(--green); color: white; border: none;
+    border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-top: 6px; transition: opacity 0.2s;
+  }
+  .btn-location:hover { opacity: 0.88; }
+
+  .btn-submit {
+    width: calc(100% - 32px); margin: 16px 16px 0;
+    padding: 12px; background: var(--blue); color: white; border: none;
+    border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: opacity 0.2s; letter-spacing: 0.3px;
+  }
+  .btn-submit:hover { opacity: 0.9; }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* MAP */
+  .map-panel { flex: 1; position: relative; }
+  #map { width: 100%; height: 100%; }
+  .map-hint {
+    position: absolute; top: 10px; right: 10px; background: white;
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px;
+    font-size: 11px; color: var(--blue); font-weight: 500; z-index: 900;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 180px; text-align: center; line-height: 1.4;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; padding: 12px 20px;
+    border-radius: 10px; font-size: 13px; font-weight: 600; z-index: 9999;
+    transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none;
+  }
+  .toast.success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+  .toast.error { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">🌻</div>
+  <div>
+    <h1>Pest Monitoring Field Data Entry</h1>
+    <p>Submit trap observations — data appears live on the main map</p>
+  </div>
+  <a href="/dashboard" class="header-link">← View Dashboard</a>
+</header>
+
+<div class="layout">
+  <!-- FORM -->
+  <div class="form-panel">
+    <div class="section-header">Observer Information</div>
+    <div class="form-body">
+      <div class="field">
+        <label>Observer Name <span class="req">*</span></label>
+        <input type="text" id="observer-name" placeholder="Your full name">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Date <span class="req">*</span></label>
+          <input type="date" id="visit-date">
+        </div>
+        <div class="field">
+          <label>Days Between Sampling <span class="req">*</span></label>
+          <input type="number" id="days-sampling" placeholder="e.g. 7" min="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">Trap &amp; Crop Information</div>
+    <div class="form-body">
+      <div class="field">
+        <label>Trap ID</label>
+        <input type="text" id="trap-id" placeholder="e.g. CB001 or new ID" list="trap-suggestions">
+        <datalist id="trap-suggestions"></datalist>
+      </div>
+      <div class="field">
+        <label>Trap Type <span class="req">*</span></label>
+        <select id="trap-type">
+          <option value="">-- Select Trap Type --</option>
+          <option value="Pheromone Trap">Pheromone Trap</option>
+          <option value="Sticky Trap">Sticky Trap</option>
+          <option value="Light Trap">Light Trap</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Crop Type / Species <span class="req">*</span></label>
+        <select id="crop-type">
+          <option value="">-- Select Crop --</option>
+          <option value="Sunflower">Sunflower</option>
+          <option value="Corn">Corn</option>
+          <option value="Soybean">Soybean</option>
+          <option value="Wheat">Wheat</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Crop Stage</label>
+        <input type="text" id="crop-stage" placeholder="e.g. R1, V6, R5.1">
+      </div>
+    </div>
+
+    <div class="section-header">Pest Data</div>
+    <div class="form-body">
+      <div class="field">
+        <label>Target Pest <span class="req">*</span></label>
+        <select id="target-pest">
+          <option value="">-- Select Pest --</option>
+          <option value="BSMoth">BSMoth / Banded SF Moth</option>
+          <option value="Carthuri">Carthuri / Cartheusiana</option>
+          <option value="SunfMoth">SunfMoth / SF Moth</option>
+          <option value="All">All Three</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>BSMoth Count</label>
+          <input type="number" id="bsmoth-count" value="0" min="0">
+        </div>
+        <div class="field">
+          <label>Carthuri Count</label>
+          <input type="number" id="carthuri-count" value="0" min="0">
+        </div>
+      </div>
+      <div class="field">
+        <label>SunfMoth Count</label>
+        <input type="number" id="sunfmoth-count" value="0" min="0">
+      </div>
+      <div class="field">
+        <label>Lure Changed</label>
+        <div class="toggle-row">
+          <button class="toggle-btn active" id="lure-yes" onclick="setLure('Y')">Yes</button>
+          <button class="toggle-btn" id="lure-no" onclick="setLure('N')">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">Location</div>
+    <div class="form-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Latitude <span class="req">*</span></label>
+          <input type="text" id="lat" placeholder="Click map to set">
+        </div>
+        <div class="field">
+          <label>Longitude <span class="req">*</span></label>
+          <input type="text" id="lng" placeholder="Click map to set">
+        </div>
+      </div>
+      <button class="btn-location" onclick="useMyLocation()">
+        📍 Use My Current Location
+      </button>
+    </div>
+
+    <div class="section-header">Additional Notes</div>
+    <div class="form-body">
+      <div class="field">
+        <label>Field Notes / Observations</label>
+        <textarea id="notes" placeholder="Optional: weather, crop stage, other observations"></textarea>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="submit-btn" onclick="submitForm()">Submit Field Data</button>
+  </div>
+
+  <!-- MAP -->
+  <div class="map-panel">
+    <div id="map"></div>
+    <div class="map-hint">🖱 Click map to set location<br><span style="color:#6b7280;font-weight:400">Submitted points appear as markers</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let map, pinMarker = null, lureChanged = 'Y';
+
+// Init map
+map = L.map('map').setView([47.5, -100.5], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© Leaflet | © OpenStreetMap', maxZoom: 18
+}).addTo(map);
+
+// Set today's date
+document.getElementById('visit-date').value = new Date().toISOString().split('T')[0];
+
+// Load existing traps as grey markers
+async function loadExistingTraps() {
+  try {
+    const traps = await fetch(`${API}/traps`).then(r => r.json());
+    traps.forEach(t => {
+      if (!t.latitude || !t.longitude) return;
+      L.circleMarker([t.latitude, t.longitude], {
+        radius: 6, color: '#9ca3af', fillColor: '#d1d5db', fillOpacity: 0.7, weight: 1.5
+      }).bindTooltip(t.trap_id, { direction: 'top', offset: [0,-4] }).addTo(map);
+    });
+
+    // Populate trap ID suggestions
+    const dl = document.getElementById('trap-suggestions');
+    traps.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.trap_id;
+      dl.appendChild(opt);
+    });
+  } catch(e) { console.error('Could not load existing traps:', e); }
+}
+
+// Click map to set pin
+map.on('click', e => {
+  const { lat, lng } = e.latlng;
+  setPin(lat, lng);
+});
+
+function setPin(lat, lng) {
+  document.getElementById('lat').value = lat.toFixed(5);
+  document.getElementById('lng').value = lng.toFixed(5);
+  if (pinMarker) map.removeLayer(pinMarker);
+  pinMarker = L.marker([lat, lng], {
+    draggable: true,
+    icon: L.divIcon({
+      className: '',
+      html: `<div style="width:18px;height:18px;border-radius:50%;background:#ef4444;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>`,
+      iconSize: [18,18], iconAnchor: [9,9]
+    })
+  }).addTo(map);
+  pinMarker.on('dragend', e => {
+    const pos = e.target.getLatLng();
+    document.getElementById('lat').value = pos.lat.toFixed(5);
+    document.getElementById('lng').value = pos.lng.toFixed(5);
+  });
+}
+
+function useMyLocation() {
+  if (!navigator.geolocation) return showToast('Geolocation not supported', 'error');
+  navigator.geolocation.getCurrentPosition(pos => {
+    setPin(pos.coords.latitude, pos.coords.longitude);
+    map.setView([pos.coords.latitude, pos.coords.longitude], 12);
+  }, () => showToast('Could not get location', 'error'));
+}
+
+function setLure(val) {
+  lureChanged = val;
+  document.getElementById('lure-yes').classList.toggle('active', val === 'Y');
+  document.getElementById('lure-no').classList.toggle('active', val === 'N');
+}
+
+async function submitForm() {
+  const required = {
+    'observer-name': 'Observer Name',
+    'visit-date': 'Date',
+    'trap-type': 'Trap Type',
+    'crop-type': 'Crop Type',
+    'target-pest': 'Target Pest',
+    'lat': 'Latitude',
+    'lng': 'Longitude'
+  };
+  for (const [id, label] of Object.entries(required)) {
+    if (!document.getElementById(id).value.trim()) {
+      return showToast(`Please fill in: ${label}`, 'error');
+    }
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const payload = {
+    trap_id: document.getElementById('trap-id').value.trim() || `FIELD-${Date.now()}`,
+    county: '',
+    visit_date: document.getElementById('visit-date').value,
+    latitude: parseFloat(document.getElementById('lat').value),
+    longitude: parseFloat(document.getElementById('lng').value),
+    bsmoth_count: +document.getElementById('bsmoth-count').value || 0,
+    carthuri_count: +document.getElementById('carthuri-count').value || 0,
+    sunfmoth_count: +document.getElementById('sunfmoth-count').value || 0,
+    lure_changed: lureChanged,
+    comments: document.getElementById('notes').value,
+    observer_name: document.getElementById('observer-name').value,
+    trap_type: document.getElementById('trap-type').value,
+    crop_type: document.getElementById('crop-type').value,
+    crop_stage: document.getElementById('crop-stage').value,
+    days_between_sampling: +document.getElementById('days-sampling').value || 0
+  };
+
+  try {
+    const res = await fetch(`${API}/visits`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Field data submitted successfully!', 'success');
+      // Turn pin green briefly
+      if (pinMarker) {
+        pinMarker.setIcon(L.divIcon({
+          className: '',
+          html: `<div style="width:18px;height:18px;border-radius:50%;background:#16a34a;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>`,
+          iconSize: [18,18], iconAnchor: [9,9]
+        }));
+      }
+      clearForm();
+    } else {
+      showToast(data.error || 'Submission failed', 'error');
+    }
+  } catch(e) {
+    showToast('Could not connect to server', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit Field Data';
+  }
+}
+
+function clearForm() {
+  document.getElementById('observer-name').value = '';
+  document.getElementById('trap-id').value = '';
+  document.getElementById('trap-type').value = '';
+  document.getElementById('crop-type').value = '';
+  document.getElementById('crop-stage').value = '';
+  document.getElementById('target-pest').value = '';
+  document.getElementById('bsmoth-count').value = '0';
+  document.getElementById('carthuri-count').value = '0';
+  document.getElementById('sunfmoth-count').value = '0';
+  document.getElementById('notes').value = '';
+  document.getElementById('days-sampling').value = '';
+  document.getElementById('visit-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('lat').value = '';
+  document.getElementById('lng').value = '';
+  setLure('Y');
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type}`;
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+loadExistingTraps();
+</script>
+</body>
+</html>

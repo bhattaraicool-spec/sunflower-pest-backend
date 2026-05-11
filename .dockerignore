@@ -1,0 +1,6 @@
+node_modules
+.DS_Store
+backend/server.js
+backend/package.json
+data/submitted_visits.json
+*.md

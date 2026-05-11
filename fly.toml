@@ -1,0 +1,24 @@
+# fly.toml — Sunflower Pest Monitor
+# Replace "sunflower-pest-monitor" with a unique name of your choice.
+app = "sunflower-pest-monitor"
+primary_region = "ord"   # Chicago — closest to ND/SD
+
+[build]
+
+[http_service]
+  internal_port     = 3000
+  force_https       = true
+  auto_stop_machines  = "stop"   # free-tier: machine sleeps when idle
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
+
+# Persistent volume so submitted visits survive restarts.
+# Created once with: fly volumes create pest_data --size 1
+[[mounts]]
+  source      = "pest_data"
+  destination = "/app/data"
