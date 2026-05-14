@@ -332,12 +332,36 @@ async function seedSheetFromCSV() {
 }
 
 async function appendToSheet(rowArray) {
-  await sheets.spreadsheets.values.append({
+  const resp = await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: SHEET_RANGE,
     valueInputOption: 'RAW',
     requestBody: { values: [rowArray] },
   });
+  // Parse row number from updatedRange like "Sheet1!A102:X102"
+  const updatedRange = resp.data.updates?.updatedRange || '';
+  const match = updatedRange.match(/(\d+)$/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+// Compute 7-day rolling average of total pest count for a trap up to visitDate
+function computeWeeklyAvg(trapId, visitDate) {
+  const cutoff = new Date(visitDate);
+  cutoff.setDate(cutoff.getDate() - 6);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const windowVisits = getRawVisits().filter(v =>
+    String(v.trap_id) === String(trapId) &&
+    v.visit_date >= cutoffStr &&
+    v.visit_date <= visitDate
+  );
+  if (windowVisits.length === 0) return 0;
+  let totalCount = 0;
+  for (const v of windowVisits) {
+    for (const k of PEST_KEYS) {
+      totalCount += parseFloat(v[`${k}_count`]) || 0;
+    }
+  }
+  return Math.round((totalCount / 7) * 100) / 100;
 }
 
 // ── 7. Source selector ────────────────────────────────────────────────────────
@@ -469,7 +493,8 @@ app.post('/api/visits', async (req, res) => {
     console.error('SQLite insert failed:', e.message);
   }
 
-  // Google Sheet append (with timeout)
+  // Google Sheet append (with timeout) — capture row number for weekly avg write
+  let appendedRow = null;
   if (sheetEnabled) {
     const row = [
       visit.id,
@@ -487,10 +512,10 @@ app.post('/api/visits', async (req, res) => {
       visit.ecornborer_count   || 0,
       visit.cornrootworm_count || 0,
       visit.alfweevil_count    || 0,
-      '',  // Avg_Pest_Per_Week_Per_Trap: formula column — left blank for Google Sheets formula
+      '',  // column X placeholder — weekly avg written below after response
     ];
     try {
-      await Promise.race([
+      appendedRow = await Promise.race([
         appendToSheet(row),
         new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10_000)),
       ]);
@@ -500,7 +525,26 @@ app.post('/api/visits', async (req, res) => {
     }
   }
 
+  // Respond to client immediately — don't block on weekly avg computation
   res.json({ success: true, id: visit.id });
+
+  // Fire-and-forget: compute weekly avg and write to column X
+  if (sheetEnabled && appendedRow) {
+    (async () => {
+      try {
+        const avg = computeWeeklyAvg(visit.trap_id, visit.visit_date);
+        await sheets.spreadsheets.values.update({
+          spreadsheetId: SHEET_ID,
+          range: `Sheet1!X${appendedRow}`,
+          valueInputOption: 'RAW',
+          requestBody: { values: [[avg]] },
+        });
+        console.log(`✓ Weekly avg ${avg} written to Sheet1!X${appendedRow}`);
+      } catch (e) {
+        console.error('Weekly avg write failed:', e.message);
+      }
+    })();
+  }
 });
 
 // ── 9. Startup sequence ───────────────────────────────────────────────────────

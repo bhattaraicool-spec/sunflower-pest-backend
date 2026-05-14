@@ -6,7 +6,7 @@
 <title>Field Data Entry — SD Pest Monitoring Network</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -21,7 +21,7 @@
     --form-w:     340px;
   }
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     background: var(--bg); color: var(--text);
     height: 100vh; overflow: hidden;
     display: flex; flex-direction: column;
@@ -34,11 +34,11 @@
     height: 52px; flex-shrink: 0;
   }
   .header-logo {
-    height: 32px; width: auto;
+    height: 46px; width: auto;
     background: var(--gold); border-radius: 4px;
     display: flex; align-items: center; justify-content: center;
     font-size: 9px; font-weight: 700; color: var(--blue);
-    padding: 0 6px; min-width: 70px;
+    padding: 0 8px; min-width: 80px;
   }
   header h1 { font-size: 14px; font-weight: 700; color: white; }
   header p  { font-size: 10px; color: rgba(255,255,255,0.6); }
@@ -158,13 +158,13 @@
 
 <header>
   <img src="/images/SD-standard-lockup.avif"
-       style="height:32px;width:auto;object-fit:contain"
+       style="height:46px;width:auto;object-fit:contain"
        alt="SDSU"
        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
   <div class="header-logo" style="display:none">SDSU</div>
   <div>
-    <h1>SD Pest Monitoring — Field Data Entry</h1>
-    <p>Submit trap observations — data appears live on the dashboard</p>
+    <h1>SD Pest Reporting</h1>
+    <p>Submit Trap Observations</p>
   </div>
   <a href="/dashboard" class="header-link">← Dashboard</a>
 </header>
