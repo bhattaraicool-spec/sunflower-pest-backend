@@ -3,79 +3,104 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sunflower Pest Monitor</title>
+<title>South Dakota Pest Monitoring Network</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --gold: #E8A020;
-    --gold-light: #FFF3DC;
-    --indigo: #3B4BA8;
-    --bg: #F8F7F2;
-    --sidebar-w: 272px;
-    --text: #1a1a2e;
-    --muted: #6b7280;
-    --card-bg: #ffffff;
-    --border: #e8e5de;
+    --blue:       #003865;
+    --blue-light: #e8eef5;
+    --gold:       #F2A900;
+    --gold-light: #FFF8E1;
+    --bg:         #F7F8FA;
+    --sidebar-w:  280px;
+    --text:       #1a1a2e;
+    --muted:      #6b7280;
+    --card-bg:    #ffffff;
+    --border:     #e2e6ea;
   }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg); color: var(--text);
+    height: 100vh; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
 
-  /* HEADER */
+  /* ── HEADER ── */
   header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 16px; background: white; border-bottom: 1px solid var(--border);
-    height: 52px; flex-shrink: 0; z-index: 100;
+    padding: 8px 18px; background: var(--blue);
+    height: 54px; flex-shrink: 0; z-index: 100;
   }
-  .header-brand { display: flex; align-items: center; gap: 10px; }
-  .sunflower-icon { font-size: 24px; }
-  .brand-text h1 { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text); line-height: 1.1; }
-  .brand-text p { font-size: 9px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+  .header-brand { display: flex; align-items: center; gap: 12px; }
+  .header-logo {
+    height: 36px; width: auto;
+    /* Placeholder style if image missing */
+    background: var(--gold); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: var(--blue);
+    padding: 0 6px; min-width: 80px; text-align: center;
+  }
+  .brand-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px; color: white; line-height: 1.1;
+  }
+  .brand-text p { font-size: 9px; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); text-transform: uppercase; font-weight: 600; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
   .traps-badge {
-    background: var(--gold-light); color: var(--gold); border: 1.5px solid var(--gold);
+    background: rgba(242,169,0,0.2); color: var(--gold); border: 1.5px solid var(--gold);
     padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
   }
+  #sheet-pill {
+    display: flex; align-items: center; gap: 5px; font-size: 11px;
+    color: rgba(255,255,255,0.7); padding: 4px 10px; border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08);
+  }
 
-  /* TABS */
+  /* ── TAB BAR ── */
   .tab-bar {
-    display: flex; background: white; border-bottom: 1px solid var(--border);
-    padding: 0 16px; flex-shrink: 0;
+    display: flex; background: white; border-bottom: 2px solid var(--border);
+    padding: 0 18px; flex-shrink: 0;
   }
   .tab-btn {
-    padding: 8px 20px; font-size: 13px; font-weight: 500; cursor: pointer;
-    border: none; background: none; color: var(--muted); border-bottom: 2.5px solid transparent;
+    padding: 10px 22px; font-size: 13px; font-weight: 500; cursor: pointer;
+    border: none; background: none; color: var(--muted);
+    border-bottom: 2.5px solid transparent; margin-bottom: -2px;
     transition: all 0.2s; font-family: inherit;
   }
-  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 600; }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+  .tab-btn:hover:not(.active) { color: var(--text); }
 
-  /* MAIN LAYOUT */
+  /* ── MAIN LAYOUT ── */
   .app-body { display: flex; flex: 1; overflow: hidden; }
 
-  /* SIDEBAR */
+  /* ── SIDEBAR ── */
   .sidebar {
     width: var(--sidebar-w); background: white; border-right: 1px solid var(--border);
     overflow-y: auto; flex-shrink: 0; padding: 16px;
     display: flex; flex-direction: column; gap: 18px;
   }
-  .sidebar-section-title {
-    font-size: 9px; letter-spacing: 2px; font-weight: 700; color: var(--muted);
-    text-transform: uppercase; margin-bottom: 10px;
+  .sidebar-title {
+    font-size: 9px; letter-spacing: 2px; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 10px;
   }
 
-  /* PEST SPECIES PILLS */
-  .pest-pills { display: flex; flex-direction: column; gap: 6px; }
+  /* ── PEST PILLS ── */
+  .pest-pills { display: flex; flex-direction: column; gap: 5px; }
   .pest-pill {
-    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
     border-radius: 8px; cursor: pointer; border: 1.5px solid var(--border);
-    background: var(--bg); transition: all 0.2s;
+    background: var(--bg); transition: all 0.15s;
   }
-  .pest-pill.active { background: var(--gold); border-color: var(--gold); color: white; }
-  .pest-pill .code { font-weight: 700; font-size: 12px; }
-  .pest-pill .name { font-size: 11px; opacity: 0.8; }
+  .pest-pill:hover { border-color: var(--blue); background: var(--blue-light); }
+  .pest-pill.active { background: var(--blue); border-color: var(--blue); color: white; }
+  .pest-pill .code { font-weight: 700; font-size: 11px; }
+  .pest-pill .name { font-size: 10px; opacity: 0.8; }
 
-  /* FILTERS */
+  /* ── FILTERS ── */
   .filter-group { display: flex; flex-direction: column; gap: 10px; }
   .filter-label { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 3px; }
   select {
@@ -87,7 +112,7 @@
   }
   .filter-buttons { display: flex; gap: 8px; margin-top: 4px; }
   .btn-apply {
-    flex: 1; padding: 9px; background: var(--gold); color: white; border: none;
+    flex: 1; padding: 9px; background: var(--blue); color: white; border: none;
     border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
     font-family: inherit; transition: opacity 0.2s;
   }
@@ -98,122 +123,299 @@
     font-weight: 500; cursor: pointer; font-family: inherit;
   }
 
-  /* SUMMARY CARDS */
+  /* ── SUMMARY CARDS ── */
   .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .summary-card {
     background: var(--gold-light); border-radius: 10px; padding: 10px 12px;
-    border: 1px solid #f0d090;
+    border: 1px solid #f0d890;
   }
-  .summary-card .val { font-size: 22px; font-weight: 700; color: var(--gold); font-family: 'DM Serif Display', serif; }
-  .summary-card .lbl { font-size: 10px; color: #8a6a20; font-weight: 500; margin-top: 2px; }
+  .summary-card .val { font-size: 22px; font-weight: 700; color: var(--blue); font-family: 'DM Serif Display', serif; }
+  .summary-card .lbl { font-size: 10px; color: #7a6020; font-weight: 500; margin-top: 2px; }
 
-  /* MAP PANEL */
-  #map-panel { flex: 1; position: relative; display: block; }
+  /* ── FULL PAGE PANELS (Home / Contact) ── */
+  .full-panel { flex: 1; overflow-y: auto; background: var(--bg); }
+
+  /* ── HOME PAGE ── */
+  #home-panel {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 48px 32px; gap: 36px;
+  }
+  .home-hero {
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+    max-width: 820px; text-align: center;
+  }
+  .home-logo {
+    height: 90px; width: auto; max-width: 320px;
+    object-fit: contain;
+  }
+  .home-logo-placeholder {
+    height: 90px; width: 280px; background: var(--blue);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    text-align: center; padding: 10px;
+  }
+  .home-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px; color: var(--blue); line-height: 1.25;
+  }
+  .home-subtitle {
+    font-size: 13px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+  }
+  .home-desc {
+    max-width: 780px; font-size: 15px; line-height: 1.75; color: var(--text);
+    background: white; border-radius: 14px; padding: 28px 32px;
+    border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  .home-image-section {
+    max-width: 820px; width: 100%; text-align: center;
+  }
+  .home-image-section h3 {
+    font-size: 14px; font-weight: 700; color: var(--blue);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
+  }
+  .home-growth-img {
+    width: 100%; max-width: 780px; height: auto; border-radius: 12px;
+    border: 1px solid var(--border); box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    object-fit: contain;
+  }
+  .home-growth-placeholder {
+    width: 100%; max-width: 780px; height: 200px;
+    background: var(--blue-light); border: 2px dashed var(--blue);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    color: var(--blue); font-weight: 600; font-size: 14px;
+  }
+  .home-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .cta-btn {
+    padding: 12px 28px; border-radius: 9px; font-size: 14px; font-weight: 600;
+    cursor: pointer; border: none; font-family: inherit; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .cta-btn-primary { background: var(--blue); color: white; }
+  .cta-btn-secondary { background: var(--gold); color: var(--blue); }
+  .cta-btn:hover { opacity: 0.88; }
+  .home-footer-note {
+    max-width: 780px; font-size: 11px; color: var(--muted); text-align: center;
+    padding: 12px 16px; background: white; border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── MAP PANEL ── */
+  #map-panel { flex: 1; position: relative; }
   #map { width: 100%; height: 100%; }
-
-  /* MAP CONTROLS */
   .map-controls {
-    position: absolute; bottom: 40px; left: 12px; z-index: 900;
+    position: absolute; bottom: 48px; left: 12px; z-index: 900;
     display: flex; flex-direction: column; gap: 6px;
   }
   .map-btn {
-    padding: 7px 14px; background: #1a1a2e; color: white; border: none;
+    padding: 7px 14px; background: var(--blue); color: white; border: none;
     border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
     font-family: inherit; opacity: 0.9;
   }
   .map-btn:hover { opacity: 1; }
 
-  /* LEGEND */
+  /* ── LEGEND BAR ── */
   .legend-bar {
     position: absolute; bottom: 0; left: 0; right: 0; background: white;
     border-top: 1px solid var(--border); padding: 6px 14px;
-    display: flex; align-items: center; gap: 20px; font-size: 10px; z-index: 900; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 16px; font-size: 10px; z-index: 900; flex-wrap: wrap;
   }
   .legend-label { font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
   .legend-items { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .legend-item { display: flex; align-items: center; gap: 4px; }
   .legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.15); }
 
-  /* ANALYTICS PANEL */
-  #analytics-panel { flex: 1; overflow-y: auto; padding: 24px; display: none; background: var(--bg); }
+  /* ── ANALYTICS PANEL ── */
+  #analytics-panel {
+    flex: 1; overflow-y: auto; padding: 24px;
+    background: var(--bg); display: none;
+  }
   .charts-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 20px; max-width: 1100px; }
   .chart-card {
     background: white; border-radius: 14px; padding: 20px;
     border: 1px solid var(--border); box-shadow: 0 1px 6px rgba(0,0,0,0.04);
   }
-  .chart-card h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .chart-card-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+  }
+  .chart-card h3 {
+    font-size: 12px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .chart-toggle {
+    display: flex; border: 1.5px solid var(--border); border-radius: 7px; overflow: hidden;
+  }
+  .chart-toggle-btn {
+    padding: 4px 12px; font-size: 11px; font-weight: 600; cursor: pointer;
+    border: none; background: white; color: var(--muted); font-family: inherit;
+    transition: all 0.15s;
+  }
+  .chart-toggle-btn.active { background: var(--blue); color: white; }
   .chart-full { grid-column: 1 / -1; }
+
+  /* ── INTERPOLATION PANEL ── */
+  #interpolation-panel { flex: 1; position: relative; display: none; }
+  #idw-map { width: 100%; height: 100%; }
+  .idw-controls {
+    position: absolute; top: 12px; right: 12px; z-index: 900;
+    background: white; border-radius: 10px; padding: 12px 14px;
+    border: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    min-width: 200px;
+  }
+  .idw-controls label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 8px; }
+  .idw-toggle-group { display: flex; flex-direction: column; gap: 6px; }
+  .idw-toggle-btn {
+    padding: 7px 12px; border: 1.5px solid var(--border); border-radius: 7px;
+    font-size: 12px; font-weight: 500; cursor: pointer; background: white;
+    color: var(--text); font-family: inherit; text-align: left; transition: all 0.15s;
+  }
+  .idw-toggle-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+  #idw-message {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    z-index: 1000; background: white; border-radius: 12px; padding: 20px 28px;
+    border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    font-size: 14px; color: var(--muted); text-align: center; display: none;
+    max-width: 340px;
+  }
+  .idw-legend {
+    position: absolute; bottom: 0; left: 0; right: 0; background: white;
+    border-top: 1px solid var(--border); padding: 6px 14px;
+    display: flex; align-items: center; gap: 16px; font-size: 10px; z-index: 900;
+  }
+
+  /* ── CONTACT PAGE ── */
+  #contact-panel {
+    display: none; flex-direction: column; align-items: center;
+    justify-content: center; padding: 60px 32px; min-height: 100%;
+  }
+  .contact-card {
+    background: white; border-radius: 16px; padding: 40px 48px;
+    border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    max-width: 480px; width: 100%; text-align: center;
+  }
+  .contact-photo {
+    width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
+    border: 4px solid var(--gold); margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;
+  }
+  .contact-photo-placeholder {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: var(--blue-light); border: 4px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; margin: 0 auto 20px; color: var(--blue);
+  }
+  .contact-name { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--blue); margin-bottom: 6px; }
+  .contact-title { font-size: 14px; color: var(--muted); margin-bottom: 4px; font-weight: 500; }
+  .contact-institution { font-size: 13px; color: var(--text); font-weight: 600; margin-bottom: 18px; }
+  .contact-email {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--blue-light); color: var(--blue);
+    padding: 10px 20px; border-radius: 9px; text-decoration: none;
+    font-size: 14px; font-weight: 600;
+  }
+  .contact-email:hover { background: var(--blue); color: white; }
+  .contact-sdsu-logo {
+    height: 50px; width: auto; margin-top: 24px; object-fit: contain;
+  }
+  .contact-sdsu-placeholder {
+    height: 50px; width: 160px; background: var(--blue); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 11px; font-weight: 700; margin: 24px auto 0;
+  }
 </style>
 </head>
 <body>
 
+<!-- ── HEADER ── -->
 <header>
   <div class="header-brand">
-    <div class="sunflower-icon">🌻</div>
+    <img src="/images/SD-standard-lockup.avif" class="header-logo"
+         alt="SDSU SD Standard Lockup"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="header-logo" style="display:none">SDSU<br>SD Lockup</div>
     <div class="brand-text">
-      <h1>Sunflower Pest Monitor</h1>
-      <p>Field Season Survey</p>
+      <h1>South Dakota Pest Monitoring Network</h1>
+      <p>Real-time field season survey · South Dakota State University</p>
     </div>
   </div>
-  <div class="traps-badge" id="traps-badge">— traps shown</div>
-  <div id="sheet-pill" title="Google Sheets sync status" style="
-    display:flex;align-items:center;gap:5px;font-size:11px;
-    color:var(--muted);padding:4px 10px;border-radius:20px;
-    border:1.5px solid var(--border);background:white;cursor:default">
-    <span id="sheet-dot" style="width:8px;height:8px;border-radius:50%;background:#d1d5db"></span>
-    <span id="sheet-label">Sheet</span>
+  <div class="header-right">
+    <div class="traps-badge" id="traps-badge">— traps shown</div>
+    <div id="sheet-pill">
+      <span id="sheet-dot" style="width:8px;height:8px;border-radius:50%;background:#6b7280"></span>
+      <span id="sheet-label">Sheet</span>
+    </div>
   </div>
 </header>
 
+<!-- ── TAB BAR ── -->
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="switchTab('map')">🗺 Map</button>
-  <button class="tab-btn" onclick="switchTab('analytics')">📊 Analytics</button>
+  <button class="tab-btn" data-tab="home" onclick="switchTab('home')">Home</button>
+  <button class="tab-btn active" data-tab="map" onclick="switchTab('map')">Real Time Dashboard</button>
+  <button class="tab-btn" data-tab="analytics" onclick="switchTab('analytics')">Analytics</button>
+  <button class="tab-btn" data-tab="interpolation" onclick="switchTab('interpolation')">Interpolation</button>
+  <button class="tab-btn" data-tab="contact" onclick="switchTab('contact')">Contact</button>
 </div>
 
+<!-- ── APP BODY ── -->
 <div class="app-body">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
+
+  <!-- SIDEBAR (shown for map, analytics, interpolation) -->
+  <aside class="sidebar" id="sidebar">
+
     <div>
-      <div class="sidebar-section-title">Pest Species</div>
+      <div class="sidebar-title">Pest Species</div>
       <div class="pest-pills">
         <div class="pest-pill active" data-pest="bsmoth" onclick="selectPest(this)">
-          <div><div class="code">BSMoth</div><div class="name">Banded SF Moth</div></div>
+          <div><div class="code">BSMoth</div><div class="name">Banded Sunflower Moth</div></div>
         </div>
         <div class="pest-pill" data-pest="carthuri" onclick="selectPest(this)">
           <div><div class="code">Carthuri</div><div class="name">Cartheusiana</div></div>
         </div>
         <div class="pest-pill" data-pest="sunfmoth" onclick="selectPest(this)">
-          <div><div class="code">SunfMoth</div><div class="name">SF Moth</div></div>
+          <div><div class="code">SunfMoth</div><div class="name">Sunflower Moth</div></div>
+        </div>
+        <div class="pest-pill" data-pest="redsfweevil" onclick="selectPest(this)">
+          <div><div class="code">RedSFWeevil</div><div class="name">Red Sunflower Seedweevil</div></div>
+        </div>
+        <div class="pest-pill" data-pest="graysfweevil" onclick="selectPest(this)">
+          <div><div class="code">GraySFWeevil</div><div class="name">Gray Sunflower Seedweevil</div></div>
+        </div>
+        <div class="pest-pill" data-pest="dctessb" onclick="selectPest(this)">
+          <div><div class="code">DectesSB</div><div class="name">Dectes Stem Borer</div></div>
+        </div>
+        <div class="pest-pill" data-pest="soybeanaphid" onclick="selectPest(this)">
+          <div><div class="code">SoybeanAphid</div><div class="name">Soybean Aphid</div></div>
+        </div>
+        <div class="pest-pill" data-pest="ecornborer" onclick="selectPest(this)">
+          <div><div class="code">ECornBorer</div><div class="name">European Corn Borer</div></div>
+        </div>
+        <div class="pest-pill" data-pest="cornrootworm" onclick="selectPest(this)">
+          <div><div class="code">CornRootworm</div><div class="name">Corn Rootworm</div></div>
+        </div>
+        <div class="pest-pill" data-pest="alfweevil" onclick="selectPest(this)">
+          <div><div class="code">AlfWeevil</div><div class="name">Alfalfa Weevil</div></div>
         </div>
       </div>
     </div>
 
     <div>
-      <div class="sidebar-section-title">Filters</div>
+      <div class="sidebar-title">Filters</div>
       <div class="filter-group">
         <div>
           <div class="filter-label">Year</div>
           <select id="filter-year"><option value="all">— All Years —</option></select>
         </div>
         <div>
-          <div class="filter-label">State</div>
-          <select id="filter-state">
-            <option value="all">— All States —</option>
-            <option value="ND">North Dakota</option>
-            <option value="SD">South Dakota</option>
-          </select>
-        </div>
-        <div>
           <div class="filter-label">County</div>
-          <select id="filter-county"><option value="all">— All Counties —</option></select>
+          <select id="filter-county">
+            <option value="all">— All Counties —</option>
+          </select>
         </div>
         <div>
           <div class="filter-label">Pest Zone</div>
           <select id="filter-zone">
             <option value="all">— All Zones —</option>
-            <option value="Low">Low Zone</option>
-            <option value="Medium">Medium Zone</option>
-            <option value="High">High Zone</option>
+            <option value="Low">Low (0–1)</option>
+            <option value="Medium">Medium (2–4)</option>
+            <option value="High">High (5+)</option>
           </select>
         </div>
         <div class="filter-buttons">
@@ -224,25 +426,83 @@
     </div>
 
     <div>
-      <div class="sidebar-section-title">Season Summary</div>
+      <div class="sidebar-title">Season Summary</div>
       <div class="summary-grid">
         <div class="summary-card"><div class="val" id="s-traps">—</div><div class="lbl">Trap Sites</div></div>
         <div class="summary-card"><div class="val" id="s-total">—</div><div class="lbl">Total Count</div></div>
-        <div class="summary-card"><div class="val" id="s-peak">—</div><div class="lbl">Peak / Trap</div></div>
+        <div class="summary-card"><div class="val" id="s-peak">—</div><div class="lbl">Avg / Trap</div></div>
         <div class="summary-card"><div class="val" id="s-high">—</div><div class="lbl">High Zones</div></div>
       </div>
     </div>
+
   </aside>
 
-  <!-- MAP -->
-  <div id="map-panel">
+  <!-- ═══ HOME PANEL ═══ -->
+  <div id="home-panel" class="full-panel" style="display:none">
+    <div style="display:flex;flex-direction:column;align-items:center;padding:48px 32px;gap:32px">
+
+      <div class="home-hero">
+        <img src="/images/SD-standard-lockup.avif" class="home-logo"
+             alt="SDSU SD Standard Lockup"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="home-logo-placeholder" style="display:none">SDSU SD Standard Lockup<br><span style="font-size:9px;font-weight:400">(drop sdsu-logo.png in public/images/)</span></div>
+
+        <div>
+          <div class="home-subtitle">South Dakota State University</div>
+          <h1 class="home-title">South Dakota Pest Monitoring Network</h1>
+        </div>
+      </div>
+
+      <div class="home-desc">
+        The Sunflower Pest Monitoring Network is a real-time, interactive mapping tool designed to
+        highlight emerging sunflower pest issues across South Dakota. This pilot project will be
+        updated throughout the growing season by university researchers, Extension specialists, and
+        IPM Specialist. The platform visualizes sunflower pest reports and supports SD sunflower
+        growers and industry in staying informed and respond to pest outbreaks. The project is funded
+        by the South Dakota Oilseed Commission. Observations displayed on this platform is intended
+        for informational purposes only and should not replace local expertise or field-level scouting.
+      </div>
+
+      <div class="home-image-section">
+        <h3>Sunflower Growth Stages Reference</h3>
+        <img src="/images/Picture1.png" class="home-growth-img"
+             alt="Sunflower Growth Stages"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="home-growth-placeholder" style="display:none">
+          Sunflower Growth Stages Image<br>
+          <span style="font-size:11px;font-weight:400;margin-top:6px">(drop Picture1.png in public/images/)</span>
+        </div>
+      </div>
+
+      <div class="home-cta">
+        <button class="cta-btn cta-btn-primary" onclick="switchTab('map')">View Real Time Dashboard</button>
+        <button class="cta-btn cta-btn-secondary" onclick="switchTab('analytics')">View Analytics</button>
+        <a href="/field-entry" class="cta-btn cta-btn-primary" style="background:#16a34a">Submit Field Data</a>
+      </div>
+
+      <div class="home-footer-note">
+        Funded by the South Dakota Oilseed Commission &nbsp;·&nbsp;
+        South Dakota State University Extension &nbsp;·&nbsp;
+        For informational purposes only — not a substitute for field scouting.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ MAP PANEL (Real Time Dashboard) ═══ -->
+  <div id="map-panel" style="flex:1;position:relative;display:block">
     <div id="map"></div>
     <div class="map-controls">
-      <button class="map-btn" onclick="zoomND()">Zoom ND</button>
-      <button class="map-btn" onclick="centerMap()">Center Map</button>
+      <button class="map-btn" onclick="centerSD()">Center on SD</button>
     </div>
     <div class="legend-bar">
-      <span class="legend-label">Count Ranges</span>
+      <span class="legend-label">Zone (per visit)</span>
+      <div class="legend-items">
+        <div class="legend-item"><div class="legend-dot" style="background:#86efac;border-color:#16a34a"></div> Low (0–1)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fdba74;border-color:#ea580c"></div> Medium (2–4)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fca5a5;border-color:#dc2626"></div> High (5+)</div>
+      </div>
+      <span class="legend-label" style="margin-left:8px">Cumulative Count</span>
       <div class="legend-items">
         <div class="legend-item"><div class="legend-dot" style="background:#d1d5db"></div> 0</div>
         <div class="legend-item"><div class="legend-dot" style="background:#99d4c8"></div> 1–49</div>
@@ -251,16 +511,10 @@
         <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> 200–299</div>
         <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> 300+</div>
       </div>
-      <span class="legend-label" style="margin-left:10px">Zone</span>
-      <div class="legend-items">
-        <div class="legend-item"><div class="legend-dot" style="background:#86efac;border-color:#16a34a"></div> Low</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fdba74;border-color:#ea580c"></div> Medium</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fca5a5;border-color:#dc2626"></div> High</div>
-      </div>
     </div>
   </div>
 
-  <!-- ANALYTICS -->
+  <!-- ═══ ANALYTICS PANEL ═══ -->
   <div id="analytics-panel">
     <div class="charts-grid">
       <div class="chart-card">
@@ -272,74 +526,194 @@
         <canvas id="barChart" height="260"></canvas>
       </div>
       <div class="chart-card chart-full">
-        <h3>Pest Count Time Series</h3>
-        <canvas id="lineChart" height="140"></canvas>
+        <div class="chart-card-header">
+          <h3>Pest Count Time Series</h3>
+          <div class="chart-toggle">
+            <button class="chart-toggle-btn active" id="btn-avg" onclick="setChartMode('avg')">Average / Trap</button>
+            <button class="chart-toggle-btn" id="btn-cum" onclick="setChartMode('cum')">Cumulative</button>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:10px" id="ts-ylabel">
+          Y-axis: Average count per trap per inspection visit (per day)
+        </div>
+        <canvas id="lineChart" height="130"></canvas>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- ═══ INTERPOLATION PANEL ═══ -->
+  <div id="interpolation-panel">
+    <div id="idw-map"></div>
+
+    <div class="idw-controls">
+      <label>Interpolation Mode</label>
+      <div class="idw-toggle-group">
+        <button class="idw-toggle-btn active" id="idw-btn-rolling" onclick="setIDWMode('rolling')">
+          7-Day Rolling Average
+        </button>
+        <button class="idw-toggle-btn" id="idw-btn-cumulative" onclick="setIDWMode('cumulative')">
+          Cumulative Season Total
+        </button>
+      </div>
+      <div style="margin-top:10px;font-size:10px;color:var(--muted);line-height:1.5">
+        Power: 2 &nbsp;·&nbsp; IDW interpolation<br>
+        Requires ≥ 3 trap locations
+      </div>
+    </div>
+
+    <div id="idw-message"></div>
+
+    <div class="idw-legend legend-bar">
+      <span class="legend-label">Interpolated Count</span>
+      <div class="legend-items">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:rgba(22,163,74,0.7);border-color:#16a34a"></div> Low (0–1)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:rgba(234,88,12,0.7);border-color:#ea580c"></div> Medium (2–4)
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:rgba(220,38,38,0.7);border-color:#dc2626"></div> High (5+)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONTACT PANEL ═══ -->
+  <div id="contact-panel" class="full-panel">
+    <div class="contact-card">
+      <img src="/images/Shrestha_Govinda_2025_WEB.avif"
+           class="contact-photo"
+           alt="Dr. Govinda Shrestha"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="contact-photo-placeholder" style="display:none">👤</div>
+
+      <div class="contact-name">Dr. Govinda Shrestha</div>
+      <div class="contact-title">Assistant Professor of Entomology</div>
+      <div class="contact-institution">South Dakota State University</div>
+      <a href="mailto:Govinda.Shrestha@sdstate.edu" class="contact-email">
+        ✉ Govinda.Shrestha@sdstate.edu
+      </a>
+
+      <img src="/images/SD-standard-lockup.avif" class="contact-sdsu-logo"
+           alt="SDSU"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="contact-sdsu-placeholder" style="display:none">SDSU SD Standard Lockup</div>
+    </div>
+  </div>
+
+</div><!-- /.app-body -->
 
 <script>
+// ─── Constants ───────────────────────────────────────────────────────────────
 const API = '/api';
-let map, markers = [], currentPest = 'bsmoth', allTraps = [], pieChart, barChart, lineChart;
+const SD_CENTER = [44.3, -100.3];
+const SD_ZOOM   = 7;
 
-// Init map
-map = L.map('map', { zoomControl: true }).setView([47.5, -100.5], 6);
+const PEST_META = [
+  { key: 'bsmoth',       label: 'Banded Sunflower Moth'    },
+  { key: 'carthuri',     label: 'Cartheusiana'              },
+  { key: 'sunfmoth',     label: 'Sunflower Moth'           },
+  { key: 'redsfweevil',  label: 'Red Sunflower Seedweevil' },
+  { key: 'graysfweevil', label: 'Gray Sunflower Seedweevil'},
+  { key: 'dctessb',      label: 'Dectes Stem Borer'        },
+  { key: 'soybeanaphid', label: 'Soybean Aphid'            },
+  { key: 'ecornborer',   label: 'European Corn Borer'      },
+  { key: 'cornrootworm', label: 'Corn Rootworm'            },
+  { key: 'alfweevil',    label: 'Alfalfa Weevil'           },
+];
+
+const SD_COUNTIES = [
+  'Aurora','Beadle','Bennett','Bon Homme','Brookings','Brown','Brule','Buffalo',
+  'Butte','Campbell','Charles Mix','Clark','Clay','Codington','Corson','Custer',
+  'Davison','Day','Deuel','Dewey','Douglas','Edmunds','Fall River','Faulk','Grant',
+  'Gregory','Haakon','Hamlin','Hand','Hanson','Harding','Hughes','Hutchinson','Hyde',
+  'Jackson','Jerauld','Jones','Kingsbury','Lake','Lawrence','Lincoln','Lyman',
+  'Marshall','McCook','McPherson','Meade','Mellette','Miner','Minnehaha','Moody',
+  'Oglala Lakota','Pennington','Perkins','Potter','Roberts','Sanborn','Spink',
+  'Stanley','Sully','Todd','Tripp','Turner','Union','Walworth','Yankton','Ziebach'
+];
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let map, markers = [], currentPest = 'bsmoth', allTraps = [];
+let pieChart, barChart, lineChart;
+let analyticsLoaded = false;
+let chartMode = 'avg'; // 'avg' | 'cum'
+let currentTab = 'map';
+
+let idwMap, idwLayer, idwMode = 'rolling';
+let idwInitialized = false;
+
+// ─── Map init ─────────────────────────────────────────────────────────────────
+map = L.map('map', { zoomControl: true }).setView(SD_CENTER, SD_ZOOM);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© Leaflet | © OpenStreetMap', maxZoom: 18
+  attribution: '© OpenStreetMap contributors', maxZoom: 18
 }).addTo(map);
 
-function zoomND() { map.setView([47.5, -100.5], 7); }
-function centerMap() { map.setView([47.5, -100.5], 6); }
+function centerSD() { map.setView(SD_CENTER, SD_ZOOM); }
 
+// ─── Color helpers ────────────────────────────────────────────────────────────
 function countColor(val) {
-  if (val === 0) return '#d1d5db';
-  if (val < 50) return '#99d4c8';
-  if (val < 100) return '#2d9e8e';
-  if (val < 200) return '#f5e642';
-  if (val < 300) return '#f59e0b';
+  if (val === 0)    return '#d1d5db';
+  if (val < 50)    return '#99d4c8';
+  if (val < 100)   return '#2d9e8e';
+  if (val < 200)   return '#f5e642';
+  if (val < 300)   return '#f59e0b';
   return '#ef4444';
 }
 function zoneColor(zone) {
-  if (zone === 'High') return '#dc2626';
+  if (zone === 'High')   return '#dc2626';
   if (zone === 'Medium') return '#ea580c';
   return '#16a34a';
 }
-
-function getCount(trap) {
-  if (currentPest === 'bsmoth') return trap.cum_bsmoth || trap.total_bsmoth || 0;
-  if (currentPest === 'carthuri') return trap.cum_carthuri || trap.total_carthuri || 0;
-  return trap.cum_sunfmoth || trap.total_sunfmoth || 0;
+function zoneBg(zone) {
+  if (zone === 'High')   return '#fca5a5';
+  if (zone === 'Medium') return '#fdba74';
+  return '#86efac';
 }
 
+function getCount(trap) {
+  return trap[`cum_${currentPest}`] || 0;
+}
+
+function pestLabel(key) {
+  const m = PEST_META.find(p => p.key === key);
+  return m ? m.label : key;
+}
+
+// ─── Marker rendering ─────────────────────────────────────────────────────────
 function renderMarkers(traps) {
   markers.forEach(m => map.removeLayer(m));
   markers = [];
   traps.forEach(trap => {
     if (!trap.latitude || !trap.longitude) return;
-    const count = getCount(trap);
-    const fill = countColor(count);
+    const count  = getCount(trap);
+    const fill   = countColor(count);
     const border = zoneColor(trap.pest_zone);
-    const r = Math.max(10, Math.min(28, 10 + Math.sqrt(count) * 1.2));
-    const icon = L.divIcon({
+    const bg     = zoneBg(trap.pest_zone);
+    const r      = Math.max(10, Math.min(28, 10 + Math.sqrt(count) * 1.2));
+    const icon   = L.divIcon({
       className: '',
-      html: `<div style="width:${r*2}px;height:${r*2}px;border-radius:50%;background:${fill};border:3px solid ${border};box-shadow:0 2px 8px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#1a1a2e;opacity:0.92"></div>`,
+      html: `<div style="width:${r*2}px;height:${r*2}px;border-radius:50%;background:${fill};border:3px solid ${border};box-shadow:0 2px 8px rgba(0,0,0,0.25);opacity:0.92"></div>`,
       iconSize: [r*2, r*2], iconAnchor: [r, r]
     });
+    // Build pest count rows for popup
+    const pestRows = PEST_META
+      .filter(p => (trap[`cum_${p.key}`] || 0) > 0)
+      .map(p => `<div><b>${p.label}:</b> ${Math.round(trap[`cum_${p.key}`] || 0)}</div>`)
+      .join('') || '<div style="color:#9ca3af">No counts recorded</div>';
+
     const m = L.marker([trap.latitude, trap.longitude], { icon })
       .bindPopup(`
-        <div style="font-family:'DM Sans',sans-serif;min-width:180px">
-          <div style="font-weight:700;font-size:14px;margin-bottom:6px">🌻 ${trap.trap_id}</div>
-          <div style="font-size:12px;color:#6b7280;margin-bottom:8px">${trap.county} County</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px">
-            <div><b>Zone:</b> <span style="color:${border};font-weight:600">${trap.pest_zone}</span></div>
-            <div><b>Visits:</b> ${trap.n_visits}</div>
-            <div><b>BSMoth:</b> ${Math.round(trap.cum_bsmoth||trap.total_bsmoth||0)}</div>
-            <div><b>Carthuri:</b> ${Math.round(trap.cum_carthuri||trap.total_carthuri||0)}</div>
-            <div><b>SunfMoth:</b> ${Math.round(trap.cum_sunfmoth||trap.total_sunfmoth||0)}</div>
-            <div><b>Score:</b> ${Math.round(count)}</div>
+        <div style="font-family:'DM Sans',sans-serif;min-width:200px">
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px">${trap.trap_id}</div>
+          <div style="font-size:12px;color:#6b7280;margin-bottom:8px">${trap.county || '—'} County</div>
+          <div style="background:${bg};border-radius:6px;padding:5px 9px;display:inline-block;font-size:11px;font-weight:700;color:${border};margin-bottom:8px">
+            ${trap.pest_zone} Zone
           </div>
-          <div style="font-size:10px;color:#9ca3af;margin-top:6px">${trap.latitude.toFixed(4)}, ${trap.longitude.toFixed(4)}</div>
+          <div style="font-size:11px;margin-bottom:6px"><b>Visits:</b> ${trap.n_visits}</div>
+          <div style="font-size:11px;display:flex;flex-direction:column;gap:2px">${pestRows}</div>
+          <div style="font-size:10px;color:#9ca3af;margin-top:8px">${trap.latitude.toFixed(4)}, ${trap.longitude.toFixed(4)}</div>
         </div>
       `).addTo(map);
     markers.push(m);
@@ -347,52 +721,70 @@ function renderMarkers(traps) {
   document.getElementById('traps-badge').textContent = `${traps.length} traps shown`;
 }
 
+// ─── Data loading ─────────────────────────────────────────────────────────────
 async function loadTraps() {
   const county = document.getElementById('filter-county').value;
-  const zone = document.getElementById('filter-zone').value;
-  const year = document.getElementById('filter-year').value;
+  const zone   = document.getElementById('filter-zone').value;
+  const year   = document.getElementById('filter-year').value;
   const params = new URLSearchParams();
   if (county !== 'all') params.set('county', county);
-  if (zone !== 'all') params.set('pest_zone', zone);
-  if (year !== 'all') params.set('year', year);
-  const res = await fetch(`${API}/traps?${params}`);
-  allTraps = await res.json();
+  if (zone   !== 'all') params.set('pest_zone', zone);
+  if (year   !== 'all') params.set('year', year);
+  const res  = await fetch(`${API}/traps?${params}`);
+  allTraps   = await res.json();
   renderMarkers(allTraps);
 }
 
 async function loadSummary() {
   const county = document.getElementById('filter-county').value;
-  const zone = document.getElementById('filter-zone').value;
+  const zone   = document.getElementById('filter-zone').value;
   const params = new URLSearchParams();
   if (county !== 'all') params.set('county', county);
-  if (zone !== 'all') params.set('pest_zone', zone);
+  if (zone   !== 'all') params.set('pest_zone', zone);
+  params.set('pest', currentPest);
   const res = await fetch(`${API}/summary?${params}`);
-  const s = await res.json();
+  const s   = await res.json();
   document.getElementById('s-traps').textContent = s.trap_sites;
   const total = s.total_count;
   document.getElementById('s-total').textContent = total >= 1000 ? (total/1000).toFixed(1)+'k' : total;
-  document.getElementById('s-peak').textContent = s.peak_per_trap;
-  document.getElementById('s-high').textContent = s.high_zones;
+  document.getElementById('s-peak').textContent  = s.peak_per_trap;
+  document.getElementById('s-high').textContent  = s.high_zones;
 }
 
-async function loadDropdowns() {
-  const [counties, years] = await Promise.all([
-    fetch(`${API}/counties`).then(r=>r.json()),
-    fetch(`${API}/years`).then(r=>r.json())
-  ]);
+function loadCountyDropdown() {
   const cSel = document.getElementById('filter-county');
-  counties.forEach(c => { const o = document.createElement('option'); o.value=c; o.textContent=c; cSel.appendChild(o); });
-  const ySel = document.getElementById('filter-year');
-  years.forEach(y => { const o = document.createElement('option'); o.value=y; o.textContent=y; ySel.appendChild(o); });
+  SD_COUNTIES.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    cSel.appendChild(o);
+  });
 }
 
-function applyFilters() { loadTraps(); loadSummary(); }
+async function loadYears() {
+  const years = await fetch(`${API}/years`).then(r => r.json());
+  const ySel  = document.getElementById('filter-year');
+  years.forEach(y => {
+    const o = document.createElement('option');
+    o.value = y; o.textContent = y;
+    ySel.appendChild(o);
+  });
+}
+
+function applyFilters() {
+  loadTraps();
+  loadSummary();
+  analyticsLoaded = false;
+  if (currentTab === 'interpolation') loadInterpolation();
+}
+
 function resetFilters() {
   document.getElementById('filter-county').value = 'all';
-  document.getElementById('filter-zone').value = 'all';
-  document.getElementById('filter-year').value = 'all';
-  document.getElementById('filter-state').value = 'all';
-  loadTraps(); loadSummary();
+  document.getElementById('filter-zone').value   = 'all';
+  document.getElementById('filter-year').value   = 'all';
+  loadTraps();
+  loadSummary();
+  analyticsLoaded = false;
+  if (currentTab === 'interpolation') loadInterpolation();
 }
 
 function selectPest(el) {
@@ -400,91 +792,335 @@ function selectPest(el) {
   el.classList.add('active');
   currentPest = el.dataset.pest;
   renderMarkers(allTraps);
+  loadSummary();
+  analyticsLoaded = false;
+  if (currentTab === 'analytics') { loadAnalytics(); analyticsLoaded = true; }
+  if (currentTab === 'interpolation') loadInterpolation();
 }
 
-// ANALYTICS
+// ─── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(name) {
+  currentTab = name;
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === name)
+  );
+
+  const showSidebar = ['map', 'analytics', 'interpolation'].includes(name);
+  document.getElementById('sidebar').style.display = showSidebar ? 'flex' : 'none';
+
+  // Show/hide panels
+  const panels = ['home', 'map', 'analytics', 'interpolation', 'contact'];
+  panels.forEach(p => {
+    const el = document.getElementById(`${p}-panel`);
+    if (!el) return;
+    if (p === name) {
+      el.style.display = ['home','contact'].includes(p) ? 'flex' : (p === 'map' ? 'block' : 'block');
+    } else {
+      el.style.display = 'none';
+    }
+  });
+
+  // Special cases
+  if (name === 'map') {
+    setTimeout(() => map.invalidateSize(), 50);
+  }
+  if (name === 'analytics' && !analyticsLoaded) {
+    loadAnalytics();
+    analyticsLoaded = true;
+  }
+  if (name === 'interpolation') {
+    initIDWMap();
+    loadInterpolation();
+  }
+  if (name === 'contact' || name === 'home') {
+    // Show traps badge still
+    document.getElementById('traps-badge').style.display = 'none';
+  } else {
+    document.getElementById('traps-badge').style.display = '';
+  }
+}
+
+// ─── Analytics ───────────────────────────────────────────────────────────────
 async function loadAnalytics() {
-  const visits = await fetch(`${API}/visits`).then(r=>r.json());
-  const traps = await fetch(`${API}/traps`).then(r=>r.json());
+  const year   = document.getElementById('filter-year').value;
+  const county = document.getElementById('filter-county').value;
+  const params = new URLSearchParams();
+  if (year   !== 'all') params.set('year', year);
+  if (county !== 'all') params.set('county', county);
 
-  // Pie chart — trap count by county
+  const [visits, traps] = await Promise.all([
+    fetch(`${API}/visits?${params}`).then(r => r.json()),
+    fetch(`${API}/traps?${params}`).then(r => r.json()),
+  ]);
+
+  buildPieChart(traps);
+  buildBarChart(traps);
+  buildLineChart(visits);
+}
+
+function buildPieChart(traps) {
   const countyCounts = {};
-  traps.forEach(t => { countyCounts[t.county] = (countyCounts[t.county]||0)+1; });
+  traps.forEach(t => { countyCounts[t.county] = (countyCounts[t.county] || 0) + 1; });
   const pieLabels = Object.keys(countyCounts);
-  const pieData = Object.values(countyCounts);
-  const pieColors = ['#f59e0b','#10b981','#3b82f6','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1','#84cc16','#06b6d4','#e11d48'];
-
+  const pieData   = Object.values(countyCounts);
+  const pieColors = ['#003865','#F2A900','#10b981','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1','#84cc16','#06b6d4','#e11d48'];
   if (pieChart) pieChart.destroy();
   pieChart = new Chart(document.getElementById('pieChart'), {
     type: 'pie',
     data: { labels: pieLabels, datasets: [{ data: pieData, backgroundColor: pieColors, borderWidth: 2, borderColor: '#fff' }] },
     options: { plugins: { legend: { position: 'right', labels: { font: { size: 11 }, padding: 8 } } }, responsive: true }
   });
+}
 
-  // Bar chart — cumulative by county
+function buildBarChart(traps) {
   const countyTotals = {};
   traps.forEach(t => {
-    if (!countyTotals[t.county]) countyTotals[t.county] = {bs:0,ca:0,sf:0};
-    countyTotals[t.county].bs += t.cum_bsmoth||t.total_bsmoth||0;
-    countyTotals[t.county].ca += t.cum_carthuri||t.total_carthuri||0;
-    countyTotals[t.county].sf += t.cum_sunfmoth||t.total_sunfmoth||0;
+    const c = t.county || 'Unknown';
+    countyTotals[c] = (countyTotals[c] || 0) + (t[`cum_${currentPest}`] || 0);
   });
-  const barLabels = Object.keys(countyTotals);
+  const barLabels = Object.keys(countyTotals).sort();
   if (barChart) barChart.destroy();
   barChart = new Chart(document.getElementById('barChart'), {
     type: 'bar',
     data: {
       labels: barLabels,
-      datasets: [
-        { label: 'BSMoth', data: barLabels.map(c=>Math.round(countyTotals[c].bs)), backgroundColor: '#6366f1' },
-        { label: 'Carthuri', data: barLabels.map(c=>Math.round(countyTotals[c].ca)), backgroundColor: '#06b6d4' },
-        { label: 'SunfMoth', data: barLabels.map(c=>Math.round(countyTotals[c].sf)), backgroundColor: '#84cc16' }
-      ]
+      datasets: [{
+        label: pestLabel(currentPest),
+        data: barLabels.map(c => Math.round(countyTotals[c])),
+        backgroundColor: '#003865',
+      }]
     },
-    options: { plugins: { legend: { labels: { font: { size: 11 } } } }, responsive: true, scales: { x: { ticks: { font: { size: 10 } } } } }
+    options: {
+      plugins: { legend: { labels: { font: { size: 11 } } } },
+      responsive: true,
+      scales: {
+        x: { ticks: { font: { size: 10 } } },
+        y: { title: { display: true, text: 'Cumulative Count', font: { size: 11 } } }
+      }
+    }
   });
+}
 
-  // Line chart — time series
+function buildLineChart(visits) {
+  // Group by date: sum counts and count visits (for average)
   const dateMap = {};
   visits.forEach(v => {
     if (!v.visit_date) return;
-    const d = v.visit_date.substring(0,10);
-    if (!dateMap[d]) dateMap[d] = {bs:0,ca:0,sf:0};
-    dateMap[d].bs += v.bsmoth_count||0;
-    dateMap[d].ca += v.carthuri_count||0;
-    dateMap[d].sf += v.sunfmoth_count||0;
+    const d = v.visit_date.substring(0, 10);
+    if (!dateMap[d]) dateMap[d] = { total: 0, n: 0 };
+    dateMap[d].total += (v[`${currentPest}_count`] || 0);
+    dateMap[d].n++;
   });
+
   const dates = Object.keys(dateMap).sort();
+  let avgData, cumData, runningTotal = 0;
+
+  avgData = dates.map(d => dateMap[d].n > 0 ? +(dateMap[d].total / dateMap[d].n).toFixed(3) : 0);
+  cumData = dates.map(d => { runningTotal += dateMap[d].total; return runningTotal; });
+
+  const isAvg   = chartMode === 'avg';
+  const lineData = isAvg ? avgData : cumData;
+  const yLabel   = isAvg
+    ? 'Avg count per trap per visit'
+    : 'Cumulative total count';
+
+  document.getElementById('ts-ylabel').textContent = `Y-axis: ${yLabel}`;
+
   if (lineChart) lineChart.destroy();
   lineChart = new Chart(document.getElementById('lineChart'), {
     type: 'line',
     data: {
       labels: dates,
-      datasets: [
-        { label: 'BSMoth_Count', data: dates.map(d=>dateMap[d].bs), borderColor: '#4f46e5', backgroundColor: 'rgba(79,70,229,0.08)', pointRadius: 4, tension: 0.3 },
-        { label: 'Carthuri_Count', data: dates.map(d=>dateMap[d].ca), borderColor: '#0284c7', backgroundColor: 'rgba(2,132,199,0.08)', pointRadius: 4, tension: 0.3 },
-        { label: 'SunfMoth_Count', data: dates.map(d=>dateMap[d].sf), borderColor: '#84cc16', backgroundColor: 'rgba(132,204,22,0.08)', pointRadius: 4, tension: 0.3 }
-      ]
+      datasets: [{
+        label: `${pestLabel(currentPest)} — ${isAvg ? 'Average' : 'Cumulative'}`,
+        data: lineData,
+        borderColor: '#003865',
+        backgroundColor: 'rgba(0,56,101,0.08)',
+        pointRadius: 4, tension: 0.3, fill: true,
+      }]
     },
     options: {
       responsive: true,
       interaction: { mode: 'index', intersect: false },
-      plugins: { tooltip: { callbacks: { title: ctx => ctx[0].label } }, legend: { labels: { font: { size: 11 } } } },
-      scales: { x: { ticks: { maxTicksLimit: 14, font: { size: 10 } } } }
+      plugins: { legend: { labels: { font: { size: 11 } } } },
+      scales: {
+        x: { ticks: { maxTicksLimit: 14, font: { size: 10 } } },
+        y: { title: { display: true, text: yLabel, font: { size: 11 } } }
+      }
     }
   });
 }
 
-let analyticsLoaded = false;
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-btn')[tab==='map'?0:1].classList.add('active');
-  document.getElementById('map-panel').style.display = tab === 'map' ? 'block' : 'none';
-  document.getElementById('analytics-panel').style.display = tab === 'analytics' ? 'block' : 'none';
-  if (tab === 'analytics' && !analyticsLoaded) { loadAnalytics(); analyticsLoaded = true; }
-  if (tab === 'map') { setTimeout(() => map.invalidateSize(), 50); }
+function setChartMode(mode) {
+  chartMode = mode;
+  document.getElementById('btn-avg').classList.toggle('active', mode === 'avg');
+  document.getElementById('btn-cum').classList.toggle('active', mode === 'cum');
+  analyticsLoaded = false;
+  loadAnalytics();
+  analyticsLoaded = true;
 }
 
+// ─── IDW Interpolation ────────────────────────────────────────────────────────
+const COS_SD = Math.cos(44.2 * Math.PI / 180);
+
+function initIDWMap() {
+  if (idwInitialized) {
+    setTimeout(() => idwMap.invalidateSize(), 50);
+    return;
+  }
+  idwMap = L.map('idw-map', { zoomControl: true }).setView(SD_CENTER, SD_ZOOM);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 18
+  }).addTo(idwMap);
+  idwInitialized = true;
+}
+
+function computeIDW(points, lat, lng, power) {
+  if (points.length === 0) return 0;
+  let wSum = 0, vSum = 0;
+  for (const p of points) {
+    const dlat = p.lat - lat;
+    const dlng = (p.lng - lng) * COS_SD;
+    const d    = Math.sqrt(dlat * dlat + dlng * dlng);
+    if (d < 0.0001) return p.value;
+    const w = 1 / Math.pow(d, power);
+    wSum += w;
+    vSum += w * p.value;
+  }
+  return wSum > 0 ? vSum / wSum : 0;
+}
+
+function valueToRGBA(value) {
+  if (value < 0.05) return [200, 220, 200, 0];
+  let r, g, b, a;
+  if (value < 2) {
+    const f = value / 2;
+    r = Math.round(22  + f * (212 - 22));
+    g = Math.round(163 + f * (88  - 163));
+    b = Math.round(74  + f * (12  - 74));
+    a = Math.round((0.25 + f * 0.25) * 255);
+  } else if (value < 5) {
+    const f = (value - 2) / 3;
+    r = Math.round(212 + f * (220 - 212));
+    g = Math.round(88  - f * (88  - 38));
+    b = Math.round(12  - f * 12);
+    a = Math.round((0.5 + f * 0.15) * 255);
+  } else {
+    const f = Math.min((value - 5) / 10, 1);
+    r = Math.round(220 - f * 50);
+    g = Math.round(38  - f * 38);
+    b = 0;
+    a = Math.round((0.65 + f * 0.15) * 255);
+  }
+  return [r, g, b, a];
+}
+
+function renderIDWCanvas(points) {
+  const LAT_MIN = 42.47, LAT_MAX = 45.95;
+  const LNG_MIN = -104.06, LNG_MAX = -96.44;
+  const W = 180, H = 120;
+  const canvas  = document.createElement('canvas');
+  canvas.width  = W;
+  canvas.height = H;
+  const ctx     = canvas.getContext('2d');
+  const imgData = ctx.createImageData(W, H);
+
+  for (let y = 0; y < H; y++) {
+    const lat = LAT_MAX - (y / H) * (LAT_MAX - LAT_MIN);
+    for (let x = 0; x < W; x++) {
+      const lng   = LNG_MIN + (x / W) * (LNG_MAX - LNG_MIN);
+      const value = computeIDW(points, lat, lng, 2);
+      const [r, g, b, a] = valueToRGBA(value);
+      const idx = (y * W + x) * 4;
+      imgData.data[idx]     = r;
+      imgData.data[idx + 1] = g;
+      imgData.data[idx + 2] = b;
+      imgData.data[idx + 3] = a;
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+  return { dataUrl: canvas.toDataURL(), bounds: [[LAT_MIN, LNG_MIN], [LAT_MAX, LNG_MAX]] };
+}
+
+async function loadInterpolation() {
+  const msgEl = document.getElementById('idw-message');
+  if (idwLayer) { idwMap.removeLayer(idwLayer); idwLayer = null; }
+
+  const year   = document.getElementById('filter-year').value;
+  const county = document.getElementById('filter-county').value;
+  const zone   = document.getElementById('filter-zone').value;
+  const params = new URLSearchParams();
+  if (year   !== 'all') params.set('year', year);
+  if (county !== 'all') params.set('county', county);
+  if (zone   !== 'all') params.set('pest_zone', zone);
+
+  const [visits, traps] = await Promise.all([
+    fetch(`${API}/visits?${params}`).then(r => r.json()),
+    fetch(`${API}/traps?${params}`).then(r => r.json()),
+  ]);
+
+  if (traps.length < 3) {
+    msgEl.textContent = 'Need at least 3 trap locations with data for interpolation. Try removing filters or adding more data.';
+    msgEl.style.display = 'block';
+    return;
+  }
+  msgEl.style.display = 'none';
+
+  let points;
+  if (idwMode === 'rolling') {
+    // 7-day rolling average per trap: last 7 days from max date in dataset
+    const allDates = visits.map(v => v.visit_date).filter(Boolean).sort();
+    const maxDate  = allDates.length ? allDates[allDates.length - 1] : null;
+    const minDate  = maxDate ? new Date(new Date(maxDate).getTime() - 6 * 86400000).toISOString().split('T')[0] : null;
+    const trapVisitMap = {};
+    visits.forEach(v => {
+      if (!v.visit_date || (minDate && v.visit_date < minDate)) return;
+      const tid = v.trap_id;
+      if (!trapVisitMap[tid]) trapVisitMap[tid] = [];
+      trapVisitMap[tid].push(v[`${currentPest}_count`] || 0);
+    });
+    points = traps
+      .filter(t => t.latitude && t.longitude)
+      .map(t => ({
+        lat:   t.latitude,
+        lng:   t.longitude,
+        value: trapVisitMap[t.trap_id]
+          ? trapVisitMap[t.trap_id].reduce((a, b) => a + b, 0) / trapVisitMap[t.trap_id].length
+          : 0
+      }));
+  } else {
+    // Cumulative season total per trap
+    points = traps
+      .filter(t => t.latitude && t.longitude)
+      .map(t => ({
+        lat:   t.latitude,
+        lng:   t.longitude,
+        value: t[`cum_${currentPest}`] || 0,
+      }));
+  }
+
+  const { dataUrl, bounds } = renderIDWCanvas(points);
+  idwLayer = L.imageOverlay(dataUrl, bounds, { opacity: 0.75 }).addTo(idwMap);
+
+  // Also add trap markers on IDW map
+  points.forEach(p => {
+    if (!p.lat || !p.lng) return;
+    L.circleMarker([p.lat, p.lng], {
+      radius: 5, color: '#003865', fillColor: '#F2A900', fillOpacity: 1, weight: 2
+    }).bindTooltip(`${pestLabel(currentPest)}: ${p.value.toFixed(2)}`).addTo(idwMap);
+  });
+
+  setTimeout(() => idwMap.invalidateSize(), 50);
+}
+
+function setIDWMode(mode) {
+  idwMode = mode;
+  document.getElementById('idw-btn-rolling').classList.toggle('active', mode === 'rolling');
+  document.getElementById('idw-btn-cumulative').classList.toggle('active', mode === 'cumulative');
+  if (currentTab === 'interpolation') loadInterpolation();
+}
+
+// ─── Sheet status ─────────────────────────────────────────────────────────────
 async function updateSheetStatus() {
   const s = await fetch('/api/status').then(r => r.json()).catch(() => null);
   if (!s) return;
@@ -492,18 +1128,31 @@ async function updateSheetStatus() {
   const label = document.getElementById('sheet-label');
   if (s.sheet_enabled) {
     dot.style.background = '#22c55e';
-    label.textContent = `Sheet ↻ ${s.cache_age_s}s ago`;
+    label.textContent    = `Sheet ↻ ${s.cache_age_s}s ago`;
   } else {
     dot.style.background = '#f59e0b';
-    label.textContent = 'CSV mode';
+    label.textContent    = 'CSV mode';
   }
 }
 
-// Poll for new data every 15s
-setInterval(() => { loadTraps(); loadSummary(); analyticsLoaded = false; updateSheetStatus(); }, 15000);
+// ─── Polling ──────────────────────────────────────────────────────────────────
+setInterval(() => {
+  loadTraps();
+  loadSummary();
+  analyticsLoaded = false;
+  updateSheetStatus();
+}, 15000);
 
-// Init
-loadDropdowns().then(() => { loadTraps(); loadSummary(); updateSheetStatus(); });
+// ─── Init ─────────────────────────────────────────────────────────────────────
+(async function init() {
+  loadCountyDropdown();
+  await loadYears();
+  await loadTraps();
+  await loadSummary();
+  updateSheetStatus();
+  // Start on map tab
+  switchTab('map');
+})();
 </script>
 </body>
 </html>

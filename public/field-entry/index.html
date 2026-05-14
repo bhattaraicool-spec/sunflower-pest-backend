@@ -3,50 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pest Monitoring — Field Data Entry</title>
+<title>Field Data Entry — SD Pest Monitoring Network</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --blue: #3B4BA8;
-    --blue-light: #eef0fb;
-    --green: #16a34a;
-    --gold: #E8A020;
-    --bg: #f4f5f9;
-    --border: #dde0ec;
-    --text: #1a1a2e;
-    --muted: #6b7280;
-    --form-w: 318px;
+    --blue:       #003865;
+    --blue-light: #e8eef5;
+    --green:      #16a34a;
+    --gold:       #F2A900;
+    --bg:         #f4f5f9;
+    --border:     #dde0ec;
+    --text:       #1a1a2e;
+    --muted:      #6b7280;
+    --form-w:     340px;
   }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg); color: var(--text);
+    height: 100vh; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
 
-  /* HEADER */
+  /* ── HEADER ── */
   header {
-    background: white; border-bottom: 1px solid var(--border);
-    padding: 10px 16px; display: flex; align-items: center; gap: 10px;
-    height: 50px; flex-shrink: 0;
+    background: var(--blue); border-bottom: none;
+    padding: 8px 16px; display: flex; align-items: center; gap: 10px;
+    height: 52px; flex-shrink: 0;
   }
-  .header-icon { font-size: 20px; }
-  header h1 { font-size: 15px; font-weight: 600; color: var(--blue); }
-  header p { font-size: 11px; color: var(--muted); }
-  .header-link { margin-left: auto; font-size: 12px; color: var(--blue); text-decoration: none; font-weight: 500; }
-  .header-link:hover { text-decoration: underline; }
+  .header-logo {
+    height: 32px; width: auto;
+    background: var(--gold); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: var(--blue);
+    padding: 0 6px; min-width: 70px;
+  }
+  header h1 { font-size: 14px; font-weight: 700; color: white; }
+  header p  { font-size: 10px; color: rgba(255,255,255,0.6); }
+  .header-link {
+    margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.8);
+    text-decoration: none; font-weight: 500;
+    padding: 6px 14px; border-radius: 7px; border: 1.5px solid rgba(255,255,255,0.25);
+  }
+  .header-link:hover { background: rgba(255,255,255,0.1); }
 
-  /* LAYOUT */
+  /* ── LAYOUT ── */
   .layout { display: flex; flex: 1; overflow: hidden; }
 
-  /* FORM PANEL */
+  /* ── FORM PANEL ── */
   .form-panel {
     width: var(--form-w); background: white; border-right: 1px solid var(--border);
-    overflow-y: auto; flex-shrink: 0; padding: 0 0 20px 0;
+    overflow-y: auto; flex-shrink: 0; padding: 0 0 24px 0;
   }
-
   .section-header {
-    font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--blue);
-    text-transform: uppercase; padding: 14px 16px 6px; border-bottom: 2px solid var(--blue);
-    margin-bottom: 12px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: white;
+    text-transform: uppercase; padding: 10px 16px 8px;
+    background: var(--blue); margin-bottom: 12px;
   }
   .form-body { padding: 0 16px; }
   .field { margin-bottom: 13px; }
@@ -64,6 +78,36 @@
   .field textarea { resize: vertical; min-height: 70px; }
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
+  /* ── PEST CHECKBOXES ── */
+  .pest-check-grid { display: flex; flex-direction: column; gap: 6px; }
+  .pest-check-item {
+    border: 1.5px solid var(--border); border-radius: 8px;
+    overflow: hidden; transition: border-color 0.15s;
+  }
+  .pest-check-item.has-count { border-color: var(--blue); }
+  .pest-check-label {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; cursor: pointer; background: #fafbfc;
+    transition: background 0.15s;
+  }
+  .pest-check-label:hover { background: var(--blue-light); }
+  .pest-check-label input[type="checkbox"] {
+    width: 16px; height: 16px; accent-color: var(--blue);
+    flex-shrink: 0;
+  }
+  .pest-check-label .pest-name { font-size: 12px; font-weight: 500; }
+  .pest-count-row {
+    display: none; padding: 8px 12px 10px; background: var(--blue-light);
+    border-top: 1px solid var(--border);
+  }
+  .pest-count-row label { font-size: 11px; font-weight: 600; color: var(--blue); margin-bottom: 4px; display: block; }
+  .pest-count-row input {
+    width: 100%; padding: 7px 10px; border: 1.5px solid var(--blue);
+    border-radius: 6px; font-size: 13px; font-family: inherit; color: var(--text);
+    background: white;
+  }
+
+  /* ── LURE TOGGLE ── */
   .toggle-row { display: flex; gap: 6px; }
   .toggle-btn {
     flex: 1; padding: 7px; border: 1.5px solid var(--border); border-radius: 7px;
@@ -72,24 +116,24 @@
   }
   .toggle-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
 
+  /* ── BUTTONS ── */
   .btn-location {
     width: 100%; padding: 9px; background: var(--green); color: white; border: none;
     border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
-    font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px;
-    margin-top: 6px; transition: opacity 0.2s;
+    font-family: inherit; display: flex; align-items: center; justify-content: center;
+    gap: 6px; margin-top: 6px; transition: opacity 0.2s;
   }
   .btn-location:hover { opacity: 0.88; }
-
   .btn-submit {
     width: calc(100% - 32px); margin: 16px 16px 0;
-    padding: 12px; background: var(--blue); color: white; border: none;
-    border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer;
+    padding: 13px; background: var(--blue); color: white; border: none;
+    border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer;
     font-family: inherit; transition: opacity 0.2s; letter-spacing: 0.3px;
   }
   .btn-submit:hover { opacity: 0.9; }
   .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  /* MAP */
+  /* ── MAP ── */
   .map-panel { flex: 1; position: relative; }
   #map { width: 100%; height: 100%; }
   .map-hint {
@@ -99,31 +143,38 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 180px; text-align: center; line-height: 1.4;
   }
 
-  /* TOAST */
+  /* ── TOAST ── */
   .toast {
     position: fixed; bottom: 24px; right: 24px; padding: 12px 20px;
     border-radius: 10px; font-size: 13px; font-weight: 600; z-index: 9999;
     transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none;
   }
   .toast.success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-  .toast.error { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
-  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error   { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+  .toast.show    { transform: translateY(0); opacity: 1; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-icon">🌻</div>
+  <img src="/images/SD-standard-lockup.avif"
+       style="height:32px;width:auto;object-fit:contain"
+       alt="SDSU"
+       onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+  <div class="header-logo" style="display:none">SDSU</div>
   <div>
-    <h1>Pest Monitoring Field Data Entry</h1>
-    <p>Submit trap observations — data appears live on the main map</p>
+    <h1>SD Pest Monitoring — Field Data Entry</h1>
+    <p>Submit trap observations — data appears live on the dashboard</p>
   </div>
-  <a href="/dashboard" class="header-link">← View Dashboard</a>
+  <a href="/dashboard" class="header-link">← Dashboard</a>
 </header>
 
 <div class="layout">
-  <!-- FORM -->
+
+  <!-- ── FORM PANEL ── -->
   <div class="form-panel">
+
+    <!-- Observer Info -->
     <div class="section-header">Observer Information</div>
     <div class="form-body">
       <div class="field">
@@ -136,38 +187,67 @@
           <input type="date" id="visit-date">
         </div>
         <div class="field">
-          <label>Days Between Sampling <span class="req">*</span></label>
+          <label>Days Between Sampling</label>
           <input type="number" id="days-sampling" placeholder="e.g. 7" min="0">
         </div>
       </div>
     </div>
 
+    <!-- Trap & Crop Info -->
     <div class="section-header">Trap &amp; Crop Information</div>
     <div class="form-body">
       <div class="field">
         <label>Trap ID</label>
-        <input type="text" id="trap-id" placeholder="e.g. CB001 or new ID" list="trap-suggestions">
+        <input type="text" id="trap-id" placeholder="e.g. SD-BRK-001 or new ID" list="trap-suggestions">
         <datalist id="trap-suggestions"></datalist>
+      </div>
+      <div class="field">
+        <label>County <span class="req">*</span></label>
+        <select id="county">
+          <option value="">-- Select County --</option>
+          <option>Aurora</option><option>Beadle</option><option>Bennett</option>
+          <option>Bon Homme</option><option>Brookings</option><option>Brown</option>
+          <option>Brule</option><option>Buffalo</option><option>Butte</option>
+          <option>Campbell</option><option>Charles Mix</option><option>Clark</option>
+          <option>Clay</option><option>Codington</option><option>Corson</option>
+          <option>Custer</option><option>Davison</option><option>Day</option>
+          <option>Deuel</option><option>Dewey</option><option>Douglas</option>
+          <option>Edmunds</option><option>Fall River</option><option>Faulk</option>
+          <option>Grant</option><option>Gregory</option><option>Haakon</option>
+          <option>Hamlin</option><option>Hand</option><option>Hanson</option>
+          <option>Harding</option><option>Hughes</option><option>Hutchinson</option>
+          <option>Hyde</option><option>Jackson</option><option>Jerauld</option>
+          <option>Jones</option><option>Kingsbury</option><option>Lake</option>
+          <option>Lawrence</option><option>Lincoln</option><option>Lyman</option>
+          <option>Marshall</option><option>McCook</option><option>McPherson</option>
+          <option>Meade</option><option>Mellette</option><option>Miner</option>
+          <option>Minnehaha</option><option>Moody</option><option>Oglala Lakota</option>
+          <option>Pennington</option><option>Perkins</option><option>Potter</option>
+          <option>Roberts</option><option>Sanborn</option><option>Spink</option>
+          <option>Stanley</option><option>Sully</option><option>Todd</option>
+          <option>Tripp</option><option>Turner</option><option>Union</option>
+          <option>Walworth</option><option>Yankton</option><option>Ziebach</option>
+        </select>
       </div>
       <div class="field">
         <label>Trap Type <span class="req">*</span></label>
         <select id="trap-type">
           <option value="">-- Select Trap Type --</option>
+          <option value="Emergence Trap">Emergence Trap</option>
           <option value="Pheromone Trap">Pheromone Trap</option>
+          <option value="Visual Count">Visual Count</option>
           <option value="Sticky Trap">Sticky Trap</option>
-          <option value="Light Trap">Light Trap</option>
-          <option value="Other">Other</option>
+          <option value="Others">Others</option>
         </select>
       </div>
       <div class="field">
-        <label>Crop Type / Species <span class="req">*</span></label>
+        <label>Crop Type <span class="req">*</span></label>
         <select id="crop-type">
           <option value="">-- Select Crop --</option>
           <option value="Sunflower">Sunflower</option>
-          <option value="Corn">Corn</option>
           <option value="Soybean">Soybean</option>
-          <option value="Wheat">Wheat</option>
-          <option value="Other">Other</option>
+          <option value="Corn">Corn</option>
+          <option value="Others">Others</option>
         </select>
       </div>
       <div class="field">
@@ -176,32 +256,126 @@
       </div>
     </div>
 
+    <!-- Pest Data -->
     <div class="section-header">Pest Data</div>
     <div class="form-body">
       <div class="field">
-        <label>Target Pest <span class="req">*</span></label>
-        <select id="target-pest">
-          <option value="">-- Select Pest --</option>
-          <option value="BSMoth">BSMoth / Banded SF Moth</option>
-          <option value="Carthuri">Carthuri / Cartheusiana</option>
-          <option value="SunfMoth">SunfMoth / SF Moth</option>
-          <option value="All">All Three</option>
-        </select>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>BSMoth Count</label>
-          <input type="number" id="bsmoth-count" value="0" min="0">
+        <label>Target Pest(s) <span class="req">*</span> — select all that apply</label>
+        <div class="pest-check-grid" id="pest-check-grid">
+
+          <div class="pest-check-item" id="item-bsmoth">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="bsmoth" onchange="onPestToggle(this)">
+              <span class="pest-name">Banded Sunflower Moth</span>
+            </label>
+            <div class="pest-count-row" id="count-bsmoth">
+              <label>Count</label>
+              <input type="number" id="val-bsmoth" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="pest-check-item" id="item-carthuri">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="carthuri" onchange="onPestToggle(this)">
+              <span class="pest-name">Cartheusiana</span>
+            </label>
+            <div class="pest-count-row" id="count-carthuri">
+              <label>Count</label>
+              <input type="number" id="val-carthuri" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="pest-check-item" id="item-sunfmoth">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="sunfmoth" onchange="onPestToggle(this)">
+              <span class="pest-name">Sunflower Moth</span>
+            </label>
+            <div class="pest-count-row" id="count-sunfmoth">
+              <label>Count</label>
+              <input type="number" id="val-sunfmoth" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="pest-check-item" id="item-redsfweevil">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="redsfweevil" onchange="onPestToggle(this)">
+              <span class="pest-name">Red Sunflower Seedweevil</span>
+            </label>
+            <div class="pest-count-row" id="count-redsfweevil">
+              <label>Count</label>
+              <input type="number" id="val-redsfweevil" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="pest-check-item" id="item-graysfweevil">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="graysfweevil" onchange="onPestToggle(this)">
+              <span class="pest-name">Gray Sunflower Seedweevil</span>
+            </label>
+            <div class="pest-count-row" id="count-graysfweevil">
+              <label>Count</label>
+              <input type="number" id="val-graysfweevil" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="pest-check-item" id="item-dctessb">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="dctessb" onchange="onPestToggle(this)">
+              <span class="pest-name">Dectes Stem Borer</span>
+            </label>
+            <div class="pest-count-row" id="count-dctessb">
+              <label>Count</label>
+              <input type="number" id="val-dctessb" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="pest-check-item" id="item-soybeanaphid">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="soybeanaphid" onchange="onPestToggle(this)">
+              <span class="pest-name">Soybean Aphid</span>
+            </label>
+            <div class="pest-count-row" id="count-soybeanaphid">
+              <label>Count</label>
+              <input type="number" id="val-soybeanaphid" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="pest-check-item" id="item-ecornborer">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="ecornborer" onchange="onPestToggle(this)">
+              <span class="pest-name">European Corn Borer</span>
+            </label>
+            <div class="pest-count-row" id="count-ecornborer">
+              <label>Count</label>
+              <input type="number" id="val-ecornborer" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="pest-check-item" id="item-cornrootworm">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="cornrootworm" onchange="onPestToggle(this)">
+              <span class="pest-name">Corn Rootworm</span>
+            </label>
+            <div class="pest-count-row" id="count-cornrootworm">
+              <label>Count</label>
+              <input type="number" id="val-cornrootworm" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="pest-check-item" id="item-alfweevil">
+            <label class="pest-check-label">
+              <input type="checkbox" data-pest="alfweevil" onchange="onPestToggle(this)">
+              <span class="pest-name">Alfalfa Weevil</span>
+            </label>
+            <div class="pest-count-row" id="count-alfweevil">
+              <label>Count</label>
+              <input type="number" id="val-alfweevil" value="0" min="0" placeholder="0">
+            </div>
+          </div>
+
         </div>
-        <div class="field">
-          <label>Carthuri Count</label>
-          <input type="number" id="carthuri-count" value="0" min="0">
-        </div>
       </div>
-      <div class="field">
-        <label>SunfMoth Count</label>
-        <input type="number" id="sunfmoth-count" value="0" min="0">
-      </div>
+
       <div class="field">
         <label>Lure Changed</label>
         <div class="toggle-row">
@@ -211,6 +385,7 @@
       </div>
     </div>
 
+    <!-- Location -->
     <div class="section-header">Location</div>
     <div class="form-body">
       <div class="field-row">
@@ -228,21 +403,25 @@
       </button>
     </div>
 
+    <!-- Notes -->
     <div class="section-header">Additional Notes</div>
     <div class="form-body">
       <div class="field">
         <label>Field Notes / Observations</label>
-        <textarea id="notes" placeholder="Optional: weather, crop stage, other observations"></textarea>
+        <textarea id="notes" placeholder="Optional: weather, crop condition, other observations"></textarea>
       </div>
     </div>
 
     <button class="btn-submit" id="submit-btn" onclick="submitForm()">Submit Field Data</button>
   </div>
 
-  <!-- MAP -->
+  <!-- ── MAP ── -->
   <div class="map-panel">
     <div id="map"></div>
-    <div class="map-hint">🖱 Click map to set location<br><span style="color:#6b7280;font-weight:400">Submitted points appear as markers</span></div>
+    <div class="map-hint">
+      🖱 Click map to set location<br>
+      <span style="color:#6b7280;font-weight:400">Or use "My Location" button</span>
+    </div>
   </div>
 </div>
 
@@ -250,12 +429,17 @@
 
 <script>
 const API = '/api';
+const PEST_KEYS = [
+  'bsmoth','carthuri','sunfmoth','redsfweevil','graysfweevil',
+  'dctessb','soybeanaphid','ecornborer','cornrootworm','alfweevil'
+];
+
 let map, pinMarker = null, lureChanged = 'Y';
 
-// Init map
-map = L.map('map').setView([47.5, -100.5], 6);
+// ── Map init ──────────────────────────────────────────────────────────────────
+map = L.map('map').setView([44.3, -100.3], 7);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© Leaflet | © OpenStreetMap', maxZoom: 18
+  attribution: '© OpenStreetMap contributors', maxZoom: 18
 }).addTo(map);
 
 // Set today's date
@@ -269,10 +453,8 @@ async function loadExistingTraps() {
       if (!t.latitude || !t.longitude) return;
       L.circleMarker([t.latitude, t.longitude], {
         radius: 6, color: '#9ca3af', fillColor: '#d1d5db', fillOpacity: 0.7, weight: 1.5
-      }).bindTooltip(t.trap_id, { direction: 'top', offset: [0,-4] }).addTo(map);
+      }).bindTooltip(t.trap_id, { direction: 'top', offset: [0, -4] }).addTo(map);
     });
-
-    // Populate trap ID suggestions
     const dl = document.getElementById('trap-suggestions');
     traps.forEach(t => {
       const opt = document.createElement('option');
@@ -282,11 +464,8 @@ async function loadExistingTraps() {
   } catch(e) { console.error('Could not load existing traps:', e); }
 }
 
-// Click map to set pin
-map.on('click', e => {
-  const { lat, lng } = e.latlng;
-  setPin(lat, lng);
-});
+// ── Map click ─────────────────────────────────────────────────────────────────
+map.on('click', e => setPin(e.latlng.lat, e.latlng.lng));
 
 function setPin(lat, lng) {
   document.getElementById('lat').value = lat.toFixed(5);
@@ -297,7 +476,7 @@ function setPin(lat, lng) {
     icon: L.divIcon({
       className: '',
       html: `<div style="width:18px;height:18px;border-radius:50%;background:#ef4444;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>`,
-      iconSize: [18,18], iconAnchor: [9,9]
+      iconSize: [18, 18], iconAnchor: [9, 9]
     })
   }).addTo(map);
   pinMarker.on('dragend', e => {
@@ -309,70 +488,102 @@ function setPin(lat, lng) {
 
 function useMyLocation() {
   if (!navigator.geolocation) return showToast('Geolocation not supported', 'error');
-  navigator.geolocation.getCurrentPosition(pos => {
-    setPin(pos.coords.latitude, pos.coords.longitude);
-    map.setView([pos.coords.latitude, pos.coords.longitude], 12);
-  }, () => showToast('Could not get location', 'error'));
+  navigator.geolocation.getCurrentPosition(
+    pos => { setPin(pos.coords.latitude, pos.coords.longitude); map.setView([pos.coords.latitude, pos.coords.longitude], 12); },
+    ()  => showToast('Could not get location', 'error')
+  );
 }
 
+// ── Pest checkboxes ───────────────────────────────────────────────────────────
+function onPestToggle(checkbox) {
+  const key     = checkbox.dataset.pest;
+  const checked = checkbox.checked;
+  const item    = document.getElementById(`item-${key}`);
+  const countRow = document.getElementById(`count-${key}`);
+  item.classList.toggle('has-count', checked);
+  countRow.style.display = checked ? 'block' : 'none';
+  if (!checked) document.getElementById(`val-${key}`).value = 0;
+}
+
+// ── Lure toggle ───────────────────────────────────────────────────────────────
 function setLure(val) {
   lureChanged = val;
   document.getElementById('lure-yes').classList.toggle('active', val === 'Y');
   document.getElementById('lure-no').classList.toggle('active', val === 'N');
 }
 
+// ── Zone calculation (Low:0-1, Medium:2-4, High:5+) ──────────────────────────
+function calcZone(total) {
+  if (total >= 5) return 'High';
+  if (total >= 2) return 'Medium';
+  return 'Low';
+}
+
+// ── Form submission ───────────────────────────────────────────────────────────
 async function submitForm() {
-  const required = {
+  // Validate required fields
+  const textRequired = {
     'observer-name': 'Observer Name',
-    'visit-date': 'Date',
-    'trap-type': 'Trap Type',
-    'crop-type': 'Crop Type',
-    'target-pest': 'Target Pest',
-    'lat': 'Latitude',
-    'lng': 'Longitude'
+    'visit-date':    'Date',
+    'county':        'County',
+    'trap-type':     'Trap Type',
+    'crop-type':     'Crop Type',
+    'lat':           'Latitude',
+    'lng':           'Longitude',
   };
-  for (const [id, label] of Object.entries(required)) {
-    if (!document.getElementById(id).value.trim()) {
+  for (const [id, label] of Object.entries(textRequired)) {
+    if (!document.getElementById(id).value.trim())
       return showToast(`Please fill in: ${label}`, 'error');
-    }
+  }
+
+  // Ensure at least one pest is selected
+  const checkedPests = PEST_KEYS.filter(k => document.querySelector(`[data-pest="${k}"]`).checked);
+  if (checkedPests.length === 0)
+    return showToast('Please select at least one Target Pest', 'error');
+
+  // Build pest counts object
+  let totalCount = 0;
+  const pestCounts = {};
+  for (const k of PEST_KEYS) {
+    const val = +document.getElementById(`val-${k}`).value || 0;
+    pestCounts[`${k}_count`] = val;
+    totalCount += val;
   }
 
   const btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting...';
+  btn.disabled    = true;
+  btn.textContent = 'Submitting…';
 
   const payload = {
-    trap_id: document.getElementById('trap-id').value.trim() || `FIELD-${Date.now()}`,
-    county: '',
-    visit_date: document.getElementById('visit-date').value,
-    latitude: parseFloat(document.getElementById('lat').value),
-    longitude: parseFloat(document.getElementById('lng').value),
-    bsmoth_count: +document.getElementById('bsmoth-count').value || 0,
-    carthuri_count: +document.getElementById('carthuri-count').value || 0,
-    sunfmoth_count: +document.getElementById('sunfmoth-count').value || 0,
+    trap_id:      document.getElementById('trap-id').value.trim() || `FIELD-${Date.now()}`,
+    county:       document.getElementById('county').value,
+    visit_date:   document.getElementById('visit-date').value,
+    latitude:     parseFloat(document.getElementById('lat').value),
+    longitude:    parseFloat(document.getElementById('lng').value),
     lure_changed: lureChanged,
-    comments: document.getElementById('notes').value,
+    comments:     document.getElementById('notes').value,
     observer_name: document.getElementById('observer-name').value,
-    trap_type: document.getElementById('trap-type').value,
-    crop_type: document.getElementById('crop-type').value,
-    crop_stage: document.getElementById('crop-stage').value,
-    days_between_sampling: +document.getElementById('days-sampling').value || 0
+    trap_type:    document.getElementById('trap-type').value,
+    crop_type:    document.getElementById('crop-type').value,
+    crop_stage:   document.getElementById('crop-stage').value,
+    days_between_sampling: +document.getElementById('days-sampling').value || 0,
+    pest_zone:    calcZone(totalCount),
+    ...pestCounts,
   };
 
   try {
-    const res = await fetch(`${API}/visits`, {
+    const res  = await fetch(`${API}/visits`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await res.json();
     if (data.success) {
       showToast('✅ Field data submitted successfully!', 'success');
-      // Turn pin green briefly
       if (pinMarker) {
         pinMarker.setIcon(L.divIcon({
           className: '',
           html: `<div style="width:18px;height:18px;border-radius:50%;background:#16a34a;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>`,
-          iconSize: [18,18], iconAnchor: [9,9]
+          iconSize: [18, 18], iconAnchor: [9, 9]
         }));
       }
       clearForm();
@@ -382,33 +593,39 @@ async function submitForm() {
   } catch(e) {
     showToast('Could not connect to server', 'error');
   } finally {
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = 'Submit Field Data';
   }
 }
 
 function clearForm() {
   document.getElementById('observer-name').value = '';
-  document.getElementById('trap-id').value = '';
-  document.getElementById('trap-type').value = '';
-  document.getElementById('crop-type').value = '';
-  document.getElementById('crop-stage').value = '';
-  document.getElementById('target-pest').value = '';
-  document.getElementById('bsmoth-count').value = '0';
-  document.getElementById('carthuri-count').value = '0';
-  document.getElementById('sunfmoth-count').value = '0';
-  document.getElementById('notes').value = '';
+  document.getElementById('trap-id').value       = '';
+  document.getElementById('county').value        = '';
+  document.getElementById('trap-type').value     = '';
+  document.getElementById('crop-type').value     = '';
+  document.getElementById('crop-stage').value    = '';
+  document.getElementById('notes').value         = '';
   document.getElementById('days-sampling').value = '';
-  document.getElementById('visit-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('lat').value = '';
-  document.getElementById('lng').value = '';
+  document.getElementById('visit-date').value    = new Date().toISOString().split('T')[0];
+  document.getElementById('lat').value           = '';
+  document.getElementById('lng').value           = '';
+  // Reset pest checkboxes and counts
+  PEST_KEYS.forEach(k => {
+    const cb = document.querySelector(`[data-pest="${k}"]`);
+    cb.checked = false;
+    document.getElementById(`item-${k}`).classList.remove('has-count');
+    document.getElementById(`count-${k}`).style.display = 'none';
+    document.getElementById(`val-${k}`).value = 0;
+  });
   setLure('Y');
 }
 
+// ── Toast ─────────────────────────────────────────────────────────────────────
 function showToast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = `toast ${type}`;
+  t.className   = `toast ${type}`;
   setTimeout(() => t.classList.add('show'), 10);
   setTimeout(() => t.classList.remove('show'), 4000);
 }
