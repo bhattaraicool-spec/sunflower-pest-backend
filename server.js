@@ -364,6 +364,45 @@ function computeWeeklyAvg(trapId, visitDate) {
   return Math.round((totalCount / 7) * 100) / 100;
 }
 
+// Check row 1 of the sheet and write any missing headers in-place (non-destructive)
+async function ensureSheetHeaders() {
+  if (!sheetEnabled) return;
+  const expected = [...SHEET_COLS, 'Avg_Pest_Per_Week_Per_Trap'];
+  try {
+    const resp = await sheets.spreadsheets.values.get({
+      spreadsheetId: SHEET_ID,
+      range: 'Sheet1!A1:X1',
+    });
+    const current = (resp.data.values || [[]])[0] || [];
+    // Find positions where the header is missing or blank
+    const missing = [];
+    expected.forEach((header, i) => {
+      if (!current[i] || current[i].trim() === '') {
+        missing.push({ col: i, header });
+      }
+    });
+    if (missing.length === 0) {
+      console.log('✓ Sheet headers: all present — no changes needed');
+      return;
+    }
+    // Write each missing header to its exact column position
+    const colLetter = i => String.fromCharCode(65 + i); // 0→A, 23→X
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId: SHEET_ID,
+      requestBody: {
+        valueInputOption: 'RAW',
+        data: missing.map(({ col, header }) => ({
+          range: `Sheet1!${colLetter(col)}1`,
+          values: [[header]],
+        })),
+      },
+    });
+    console.log(`✓ Sheet headers: added ${missing.length} missing — ${missing.map(m => m.header).join(', ')}`);
+  } catch (e) {
+    console.error('ensureSheetHeaders failed:', e.message);
+  }
+}
+
 // ── 7. Source selector ────────────────────────────────────────────────────────
 function getTraps()     { return cache.aggregated.length ? cache.aggregated : csvTraps; }
 function getRawVisits() { return cache.rows.length       ? cache.rows       : csvVisits; }
@@ -553,6 +592,7 @@ async function start() {
   initSQLite();
   await initSheets();
   if (sheetEnabled) {
+    await ensureSheetHeaders();
     await seedSheetFromCSV();
     await fetchSheetData(true);
     setInterval(() => fetchSheetData(), SHEET_POLL_MS);
