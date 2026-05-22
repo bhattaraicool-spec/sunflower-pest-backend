@@ -396,18 +396,10 @@
     <div class="legend-bar">
       <span class="legend-label">Zone (per visit)</span>
       <div class="legend-items">
-        <div class="legend-item"><div class="legend-dot" style="background:#86efac;border-color:#16a34a"></div> Low (0–1)</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fdba74;border-color:#ea580c"></div> Medium (2–4)</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fca5a5;border-color:#dc2626"></div> High (5+)</div>
-      </div>
-      <span class="legend-label" style="margin-left:8px">Cumulative Count</span>
-      <div class="legend-items">
-        <div class="legend-item"><div class="legend-dot" style="background:#d1d5db"></div> 0</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#99d4c8"></div> 1–49</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#2d9e8e"></div> 50–99</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f5e642"></div> 100–199</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> 200–299</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> 300+</div>
+        <div class="legend-item"><svg width="10" height="15" viewBox="0 0 16 24" style="display:block"><path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16C16 3.58 12.42 0 8 0z" fill="#ffffff" stroke="#9ca3af" stroke-width="1.5"/><circle cx="8" cy="8" r="2.5" fill="#9ca3af"/></svg> Zero</div>
+        <div class="legend-item"><svg width="10" height="15" viewBox="0 0 16 24" style="display:block"><path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16C16 3.58 12.42 0 8 0z" fill="#16a34a" stroke="#15803d" stroke-width="1.5"/><circle cx="8" cy="8" r="2.5" fill="rgba(255,255,255,0.85)"/></svg> Low (1)</div>
+        <div class="legend-item"><svg width="10" height="15" viewBox="0 0 16 24" style="display:block"><path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16C16 3.58 12.42 0 8 0z" fill="#ea580c" stroke="#c2410c" stroke-width="1.5"/><circle cx="8" cy="8" r="2.5" fill="rgba(255,255,255,0.85)"/></svg> Medium (2–4)</div>
+        <div class="legend-item"><svg width="10" height="15" viewBox="0 0 16 24" style="display:block"><path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16C16 3.58 12.42 0 8 0z" fill="#dc2626" stroke="#991b1b" stroke-width="1.5"/><circle cx="8" cy="8" r="2.5" fill="rgba(255,255,255,0.85)"/></svg> High (5+)</div>
       </div>
     </div>
   </div>
@@ -458,20 +450,19 @@
         <div class="legend-item"><div class="legend-dot" style="background:rgba(234,88,12,0.7);border-color:#ea580c"></div> Medium (2–4)</div>
         <div class="legend-item"><div class="legend-dot" style="background:rgba(220,38,38,0.7);border-color:#dc2626"></div> High (5+)</div>
       </div>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);font-style:italic">Interpolation uses all available trap locations regardless of county filter</span>
     </div>
   </div>
 
   <!-- ═══ CONTACT PANEL ═══ -->
   <div id="contact-panel" class="full-panel">
     <div class="contact-card">
-      <img src="/images/Shrestha_Govinda_2025_WEB.avif"
-           class="contact-photo"
-           alt="Dr. Govinda Shrestha"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="contact-photo-placeholder" style="display:none">👤</div>
-      <div class="contact-name">Dr. Govinda Shrestha</div>
-      <div class="contact-title">Assistant Professor of Entomology</div>
-      <div class="contact-institution">South Dakota State University</div>
+      <div class="contact-name">SDSU Pest Monitoring Network Team</div>
+      <ul style="list-style:none;margin:18px 0 24px;padding:0;font-size:15px;color:var(--text);line-height:2.2">
+        <li>Govinda Shrestha</li>
+        <li>Adam Varehorst</li>
+        <li>Philip Rozeboom</li>
+      </ul>
       <a href="mailto:Govinda.Shrestha@sdstate.edu" class="contact-email">
         ✉ Govinda.Shrestha@sdstate.edu
       </a>
@@ -611,6 +602,22 @@ function getCount(trap) {
   return getActivePestKeys().reduce((sum, k) => sum + (trap[`cum_${k}`] || 0), 0);
 }
 
+// ─── Pin icon factory ─────────────────────────────────────────────────────────
+function makePinIcon(count, zone) {
+  let fill, stroke, dotFill;
+  if (count === 0) {
+    fill = '#ffffff'; stroke = '#9ca3af'; dotFill = '#9ca3af';
+  } else if (zone === 'High') {
+    fill = '#dc2626'; stroke = '#991b1b'; dotFill = 'rgba(255,255,255,0.85)';
+  } else if (zone === 'Medium') {
+    fill = '#ea580c'; stroke = '#c2410c'; dotFill = 'rgba(255,255,255,0.85)';
+  } else {
+    fill = '#16a34a'; stroke = '#15803d'; dotFill = 'rgba(255,255,255,0.85)';
+  }
+  const svg = `<svg width="16" height="24" viewBox="0 0 16 24" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 5.25 8 16 8 16s8-10.75 8-16C16 3.58 12.42 0 8 0z" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/><circle cx="8" cy="8" r="2.5" fill="${dotFill}"/></svg>`;
+  return L.divIcon({ className: '', html: svg, iconSize: [16, 24], iconAnchor: [8, 24] });
+}
+
 // ─── Marker rendering ─────────────────────────────────────────────────────────
 function renderMarkers(traps) {
   markers.forEach(m => map.removeLayer(m));
@@ -618,15 +625,8 @@ function renderMarkers(traps) {
   traps.forEach(trap => {
     if (!trap.latitude || !trap.longitude) return;
     const count  = getCount(trap);
-    const fill   = countColor(count);
-    const border = zoneColor(trap.pest_zone);
     const bg     = zoneBg(trap.pest_zone);
-    const r      = Math.max(10, Math.min(28, 10 + Math.sqrt(count) * 1.2));
-    const icon   = L.divIcon({
-      className: '',
-      html: `<div style="width:${r*2}px;height:${r*2}px;border-radius:50%;background:${fill};border:3px solid ${border};box-shadow:0 2px 8px rgba(0,0,0,0.25);opacity:0.92"></div>`,
-      iconSize: [r*2, r*2], iconAnchor: [r, r]
-    });
+    const icon   = makePinIcon(count, trap.pest_zone);
     const pestRows = PEST_META
       .filter(p => (trap[`cum_${p.key}`] || 0) > 0)
       .map(p => `<div><b>${p.label}:</b> ${Math.round(trap[`cum_${p.key}`] || 0)}</div>`)
@@ -943,13 +943,10 @@ async function loadInterpolation() {
   // Remove old markers
   idwMap.eachLayer(l => { if (l instanceof L.CircleMarker) idwMap.removeLayer(l); });
 
+  // Interpolation always uses all trap points — only year is applied, county/zone are ignored
   const year   = document.getElementById('filter-year').value;
-  const county = document.getElementById('filter-county').value;
-  const zone   = document.getElementById('filter-zone').value;
   const params = new URLSearchParams();
-  if (year   !== 'all') params.set('year', year);
-  if (county !== 'all') params.set('county', county);
-  if (zone   !== 'all') params.set('pest_zone', zone);
+  if (year !== 'all') params.set('year', year);
 
   const [visits, traps] = await Promise.all([
     fetch(`${API}/visits?${params}`).then(r => r.json()),
