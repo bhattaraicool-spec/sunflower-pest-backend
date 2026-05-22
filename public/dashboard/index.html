@@ -921,41 +921,65 @@ function valueToRGBA(value) {
 }
 
 function renderIDWCanvas(points) {
-  const LAT_MIN = 42.47, LAT_MAX = 45.95;
-  const LNG_MIN = -104.06, LNG_MAX = -96.44;
-  const W = 360, H = 240;
-  // Fade starts at FADE_START degrees from nearest trap, fully transparent at FADE_END
-  const FADE_START = 0.7, FADE_END = 1.2;
+  // Canvas bounds are computed dynamically from the actual trap locations so the
+  // heatmap always appears where the dots are, regardless of which state they're in.
+  const PAD        = 1.2;  // canvas extends this many degrees beyond trap extent
+  const FADE_START = 0.8;  // begin alpha fade at this distance from nearest trap
+  const FADE_END   = 1.0;  // fully transparent at/beyond this distance (< PAD ensures clean edges)
+
+  const lats   = points.map(p => p.lat);
+  const lngs   = points.map(p => p.lng);
+  const latMin = Math.min(...lats) - PAD;
+  const latMax = Math.max(...lats) + PAD;
+  const lngMin = Math.min(...lngs) - PAD;
+  const lngMax = Math.max(...lngs) + PAD;
+
+  const latRange = latMax - latMin;
+  const lngRange = lngMax - lngMin;
+  // Proportional canvas: preserve geographic aspect ratio, cap for performance
+  const H = 260;
+  const W = Math.min(500, Math.max(260, Math.round(H * lngRange / latRange)));
+
   const canvas  = document.createElement('canvas');
   canvas.width  = W; canvas.height = H;
   const ctx     = canvas.getContext('2d');
   const imgData = ctx.createImageData(W, H);
+
   for (let y = 0; y < H; y++) {
-    const lat = LAT_MAX - (y / H) * (LAT_MAX - LAT_MIN);
+    const lat = latMax - (y / H) * latRange;
     for (let x = 0; x < W; x++) {
-      const lng = LNG_MIN + (x / W) * (LNG_MAX - LNG_MIN);
+      const lng = lngMin + (x / W) * lngRange;
       const idx = (y * W + x) * 4;
+
       // Distance to nearest trap (longitude-adjusted)
       let minDist = Infinity;
       for (const p of points) {
         const dlat = p.lat - lat;
         const dlng = (p.lng - lng) * COS_SD;
-        const d = Math.sqrt(dlat * dlat + dlng * dlng);
+        const d    = Math.sqrt(dlat * dlat + dlng * dlng);
         if (d < minDist) minDist = d;
       }
-      // Fully transparent beyond fade boundary
+
+      // Beyond fade zone → fully transparent, skip expensive IDW call
       if (minDist >= FADE_END) { imgData.data[idx + 3] = 0; continue; }
+
       const value = computeIDW(points, lat, lng, 2);
       let [r, g, b, a] = valueToRGBA(value);
+
       // Smooth alpha fade near boundary
       if (minDist > FADE_START) {
         a = Math.round(a * (1 - (minDist - FADE_START) / (FADE_END - FADE_START)));
       }
-      imgData.data[idx] = r; imgData.data[idx+1] = g; imgData.data[idx+2] = b; imgData.data[idx+3] = a;
+
+      imgData.data[idx]   = r;
+      imgData.data[idx+1] = g;
+      imgData.data[idx+2] = b;
+      imgData.data[idx+3] = a;
     }
   }
+
   ctx.putImageData(imgData, 0, 0);
-  return { dataUrl: canvas.toDataURL(), bounds: [[LAT_MIN, LNG_MIN], [LAT_MAX, LNG_MAX]] };
+  return { dataUrl: canvas.toDataURL(), bounds: [[latMin, lngMin], [latMax, lngMax]] };
 }
 
 async function loadInterpolation() {
