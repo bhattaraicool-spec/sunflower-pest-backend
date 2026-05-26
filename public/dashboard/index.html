@@ -244,7 +244,8 @@
   <button class="tab-btn" data-tab="home" onclick="switchTab('home')">Home</button>
   <button class="tab-btn active" data-tab="map" onclick="switchTab('map')">Real Time Dashboard</button>
   <button class="tab-btn" data-tab="analytics" onclick="switchTab('analytics')">Analytics</button>
-  <button class="tab-btn" data-tab="interpolation" onclick="switchTab('interpolation')">Interpolation</button>
+  <!-- INTERPOLATION TAB — uncomment to re-enable -->
+  <!-- <button class="tab-btn" data-tab="interpolation" onclick="switchTab('interpolation')">Interpolation</button> -->
   <button class="tab-btn" data-tab="contact" onclick="switchTab('contact')">Contact</button>
 </div>
 
@@ -457,15 +458,12 @@
   <!-- ═══ CONTACT PANEL ═══ -->
   <div id="contact-panel" class="full-panel">
     <div class="contact-card">
-      <div class="contact-name">SDSU Pest Monitoring Network Team</div>
-      <ul style="list-style:none;margin:18px 0 24px;padding:0;font-size:15px;color:var(--text);line-height:2.2">
-        <li>Govinda Shrestha</li>
-        <li>Adam Varehorst</li>
-        <li>Philip Rozeboom</li>
+      <div class="contact-name" style="font-size:17px;white-space:nowrap">SDSU Pest Monitoring Network Team</div>
+      <ul style="list-style:none;margin:18px 0 8px;padding:0;font-size:15px;color:var(--text);line-height:2.2">
+        <li style="display:flex;align-items:center;gap:8px">Govinda Shrestha <a href="mailto:Govinda.Shrestha@sdstate.edu" title="Govinda.Shrestha@sdstate.edu" style="color:var(--blue);text-decoration:none;font-size:15px;opacity:0.6;line-height:1" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✉</a></li>
+        <li style="display:flex;align-items:center;gap:8px">Adam Varenhorst <a href="mailto:Adam.Varenhorst@sdstate.edu" title="Adam.Varenhorst@sdstate.edu" style="color:var(--blue);text-decoration:none;font-size:15px;opacity:0.6;line-height:1" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✉</a></li>
+        <li style="display:flex;align-items:center;gap:8px">Philip Rozeboom <a href="mailto:philip.rozeboom@sdstate.edu" title="philip.rozeboom@sdstate.edu" style="color:var(--blue);text-decoration:none;font-size:15px;opacity:0.6;line-height:1" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✉</a></li>
       </ul>
-      <a href="mailto:Govinda.Shrestha@sdstate.edu" class="contact-email">
-        ✉ Govinda.Shrestha@sdstate.edu
-      </a>
     </div>
   </div>
 
