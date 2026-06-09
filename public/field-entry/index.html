@@ -56,6 +56,7 @@
   .form-panel {
     width: var(--form-w); background: white; border-right: 1px solid var(--border);
     overflow-y: auto; flex-shrink: 0; padding: 0 0 24px 0;
+    position: relative;
   }
   .section-header {
     font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: white;
@@ -152,6 +153,66 @@
   .toast.success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
   .toast.error   { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
   .toast.show    { transform: translateY(0); opacity: 1; }
+
+  /* ── MOBILE FORM DRAWER ── */
+  /* Default (hidden) states — must come BEFORE the media query overrides */
+  #form-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+  }
+  #form-overlay.open { display: block; }
+
+  #form-close {
+    display: none;
+    position: absolute;
+    top: 10px; right: 15px;
+    background: none; border: none;
+    font-size: 22px; color: var(--muted);
+    cursor: pointer; line-height: 1;
+    padding: 4px;
+  }
+
+  #mobile-form-btn {
+    display: none;
+    position: fixed;
+    top: 130px; left: 10px;
+    z-index: 1000;
+    background: var(--blue);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+
+  /* Media query overrides — declared AFTER defaults so they win */
+  @media (max-width: 768px) {
+    .form-panel {
+      position: fixed;
+      top: 0; left: 0;
+      width: 85vw;
+      height: 100vh;
+      background: white;
+      z-index: 999;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+    }
+    .form-panel.open { transform: translateX(0); }
+
+    #form-close { display: flex; }
+
+    #mobile-form-btn { display: flex; }
+  }
 </style>
 </head>
 <body>
@@ -165,10 +226,14 @@
   <a href="/dashboard" class="header-link">← Dashboard</a>
 </header>
 
+<!-- Mobile form overlay -->
+<div id="form-overlay" onclick="closeFormPanel()"></div>
+
 <div class="layout">
 
   <!-- ── FORM PANEL ── -->
-  <div class="form-panel">
+  <div class="form-panel" id="form-panel">
+  <button id="form-close" onclick="closeFormPanel()" title="Close form">✕</button>
 
     <!-- Observer Info -->
     <div class="section-header">Observer Information</div>
@@ -413,6 +478,7 @@
 
   <!-- ── MAP ── -->
   <div class="map-panel">
+    <button id="mobile-form-btn" onclick="openFormPanel()">&#9776; Form</button>
     <div id="map"></div>
     <div class="map-hint">
       🖱 Click map to set location<br>
@@ -624,6 +690,20 @@ function showToast(msg, type) {
   t.className   = `toast ${type}`;
   setTimeout(() => t.classList.add('show'), 10);
   setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// ── Mobile form drawer ────────────────────────────────────────────────────────
+function openFormPanel() {
+  document.getElementById('form-panel').classList.add('open');
+  document.getElementById('form-overlay').classList.add('open');
+  document.getElementById('mobile-form-btn').style.display = 'none';
+  document.body.style.overflow = 'hidden';
+}
+function closeFormPanel() {
+  document.getElementById('form-panel').classList.remove('open');
+  document.getElementById('form-overlay').classList.remove('open');
+  document.getElementById('mobile-form-btn').style.display = 'flex';
+  document.body.style.overflow = '';
 }
 
 loadExistingTraps();
