@@ -3,8 +3,8 @@ DROP YOUR IMAGE FILES HERE
 
 Place these three files directly in this folder (public/images/):
 
-1. sdsu-logo.png
-   → SDSU SD Standard Lockup image
+1. logo.png
+   → App logo image
    → Used in: header (both pages), Home page hero, Contact page
    → The app will show a gold placeholder box if this file is missing
 
@@ -19,7 +19,7 @@ Place these three files directly in this folder (public/images/):
    → The app will show a dashed placeholder box if this file is missing
 
 After dropping the files here, they are immediately served at:
-  /images/sdsu-logo.png
+  /images/logo.png
   /images/Shrestha_Govinda_2025_WEB.avif
   /images/Picture1.png
 

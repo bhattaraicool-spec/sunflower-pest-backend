@@ -217,7 +217,7 @@
   #sidebar-close {
     display: none;
     position: absolute;
-    top: 12px; right: 12px;
+    top: 10px; right: 15px;
     background: none; border: none;
     font-size: 22px; color: var(--muted);
     cursor: pointer; line-height: 1;
@@ -227,7 +227,7 @@
   #mobile-filter-btn {
     display: none;
     position: fixed;
-    top: 80px; left: 10px;
+    top: 130px; left: 10px;
     z-index: 1000;
     background: var(--blue);
     color: white;
@@ -281,14 +281,10 @@
 <!-- ── HEADER ── -->
 <header>
   <div class="header-brand">
-    <img src="/images/logo-nav.png"
-         class="header-logo-img"
-         alt="South Dakota Pest Monitoring Network Logo"
-         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-    <div class="header-logo-placeholder" style="display:none">SDSU Logo</div>
+    <span style="font-size: 2rem; line-height: 1; filter: sepia(1) saturate(5) hue-rotate(5deg); ">🪲</span>
     <div class="brand-text">
       <h1>South Dakota Pest Monitoring Network</h1>
-      <p>Real-time field season survey · South Dakota State University</p>
+      <p>Real-time field season survey</p>
     </div>
   </div>
   <div class="header-right">
@@ -411,9 +407,8 @@
         <img src="/images/logo.png" class="home-logo"
              alt="South Dakota Pest Monitoring Network Logo"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="home-logo-placeholder" style="display:none">SDSU Logo</div>
+        <div class="home-logo-placeholder" style="display:none">Logo</div>
         <div>
-          <div class="home-subtitle">South Dakota State University</div>
           <h1 class="home-title">South Dakota Pest Monitoring Network</h1>
         </div>
       </div>
@@ -447,7 +442,6 @@
 
       <div class="home-footer-note">
         Funded by the South Dakota Oilseed Commission &nbsp;·&nbsp;
-        South Dakota State University Extension &nbsp;·&nbsp;
         For informational purposes only — not a substitute for field scouting.
       </div>
     </div>
@@ -524,7 +518,7 @@
   <!-- ═══ CONTACT PANEL ═══ -->
   <div id="contact-panel" class="full-panel">
     <div class="contact-card">
-      <div class="contact-name" style="font-size:17px;white-space:nowrap">SDSU Pest Monitoring Network Team</div>
+      <div class="contact-name" style="font-size:17px;white-space:nowrap">Pest Monitoring Network Team</div>
       <ul style="list-style:none;margin:18px 0 8px;padding:0;font-size:15px;color:var(--text);line-height:2.2;text-align:center">
         <li style="display:flex;align-items:center;justify-content:center;gap:8px">Adam Varenhorst <a href="mailto:Adam.Varenhorst@sdstate.edu" title="Adam.Varenhorst@sdstate.edu" style="color:var(--blue);text-decoration:none;font-size:15px;opacity:0.6;line-height:1" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✉</a></li>
         <li style="display:flex;align-items:center;justify-content:center;gap:8px">Philip Rozeboom <a href="mailto:philip.rozeboom@sdstate.edu" title="philip.rozeboom@sdstate.edu" style="color:var(--blue);text-decoration:none;font-size:15px;opacity:0.6;line-height:1" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">✉</a></li>
@@ -540,11 +534,13 @@
 function openSidebar() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('sidebar-overlay').classList.add('open');
+  document.getElementById('mobile-filter-btn').style.display = 'none';
   document.body.style.overflow = 'hidden';
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebar-overlay').classList.remove('open');
+  document.getElementById('mobile-filter-btn').style.display = 'flex';
   document.body.style.overflow = '';
 }
 
