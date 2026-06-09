@@ -204,51 +204,30 @@
   .idw-legend { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); padding: 6px 14px; display: flex; align-items: center; gap: 16px; font-size: 10px; z-index: 900; }
 
   /* ── MOBILE SIDEBAR ── */
-  @media (max-width: 768px) {
-    .sidebar {
-      position: fixed;
-      top: 0; left: 0;
-      height: 100vh;
-      width: 85vw;
-      max-width: 320px;
-      z-index: 1100;
-      transform: translateX(-100%);
-      transition: transform 0.3s ease;
-      overflow-y: auto;
-      padding-top: 52px;
-    }
-    .sidebar.open { transform: translateX(0); }
-
-    #sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 1050;
-    }
-    #sidebar-overlay.open { display: block; }
-
-    #sidebar-close {
-      display: flex;
-      position: absolute;
-      top: 12px; right: 12px;
-      background: none; border: none;
-      font-size: 22px; color: var(--muted);
-      cursor: pointer; line-height: 1;
-      padding: 4px;
-    }
-
-    #mobile-filter-btn {
-      display: flex;
-    }
+  /* Default (hidden) states — must come BEFORE the media query overrides */
+  #sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
   }
+  #sidebar-overlay.open { display: block; }
 
-  #sidebar-close { display: none; }
+  #sidebar-close {
+    display: none;
+    position: absolute;
+    top: 12px; right: 12px;
+    background: none; border: none;
+    font-size: 22px; color: var(--muted);
+    cursor: pointer; line-height: 1;
+    padding: 4px;
+  }
 
   #mobile-filter-btn {
     display: none;
-    position: absolute;
-    top: 12px; left: 12px;
+    position: fixed;
+    top: 80px; left: 10px;
     z-index: 1000;
     background: var(--blue);
     color: white;
@@ -262,6 +241,27 @@
     align-items: center;
     gap: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+
+  /* Media query overrides — declared AFTER defaults so they win */
+  @media (max-width: 768px) {
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      width: 85vw;
+      background: white;
+      z-index: 999;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+      padding-top: 52px;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    #sidebar-close { display: flex; }
+
+    #mobile-filter-btn { display: flex; }
   }
 
   /* ── CONTACT PAGE ── */
@@ -281,7 +281,7 @@
 <!-- ── HEADER ── -->
 <header>
   <div class="header-brand">
-    <img src="/images/logo.png"
+    <img src="/images/logo-nav.png"
          class="header-logo-img"
          alt="South Dakota Pest Monitoring Network Logo"
          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
