@@ -203,6 +203,67 @@
   #idw-message { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 1000; background: white; border-radius: 12px; padding: 20px 28px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.12); font-size: 14px; color: var(--muted); text-align: center; display: none; max-width: 340px; }
   .idw-legend { position: absolute; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); padding: 6px 14px; display: flex; align-items: center; gap: 16px; font-size: 10px; z-index: 900; }
 
+  /* ── MOBILE SIDEBAR ── */
+  @media (max-width: 768px) {
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      width: 85vw;
+      max-width: 320px;
+      z-index: 1100;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+      padding-top: 52px;
+    }
+    .sidebar.open { transform: translateX(0); }
+
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1050;
+    }
+    #sidebar-overlay.open { display: block; }
+
+    #sidebar-close {
+      display: flex;
+      position: absolute;
+      top: 12px; right: 12px;
+      background: none; border: none;
+      font-size: 22px; color: var(--muted);
+      cursor: pointer; line-height: 1;
+      padding: 4px;
+    }
+
+    #mobile-filter-btn {
+      display: flex;
+    }
+  }
+
+  #sidebar-close { display: none; }
+
+  #mobile-filter-btn {
+    display: none;
+    position: absolute;
+    top: 12px; left: 12px;
+    z-index: 1000;
+    background: var(--blue);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+
   /* ── CONTACT PAGE ── */
   #contact-panel { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 60px 32px; min-height: 100%; }
   .contact-card { background: white; border-radius: 16px; padding: 40px 48px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.07); max-width: 440px; width: 100%; text-align: center; }
@@ -220,11 +281,11 @@
 <!-- ── HEADER ── -->
 <header>
   <div class="header-brand">
-    <img src="/images/SD-standard-lockup.avif"
+    <img src="/images/logo.png"
          class="header-logo-img"
-         alt="SDSU SD Standard Lockup"
+         alt="South Dakota Pest Monitoring Network Logo"
          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-    <div class="header-logo-placeholder" style="display:none">SDSU SD Standard Lockup</div>
+    <div class="header-logo-placeholder" style="display:none">SDSU Logo</div>
     <div class="brand-text">
       <h1>South Dakota Pest Monitoring Network</h1>
       <p>Real-time field season survey · South Dakota State University</p>
@@ -249,11 +310,15 @@
   <button class="tab-btn" data-tab="contact" onclick="switchTab('contact')">Contact</button>
 </div>
 
+<!-- Mobile sidebar overlay -->
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <!-- ── APP BODY ── -->
 <div class="app-body">
 
   <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
+  <button id="sidebar-close" onclick="closeSidebar()" title="Close filters">✕</button>
 
     <div>
       <div class="sidebar-title">Pest Species</div>
@@ -343,10 +408,10 @@
     <div style="display:flex;flex-direction:column;align-items:center;padding:48px 32px;gap:32px">
 
       <div class="home-hero">
-        <img src="/images/SD-standard-lockup.avif" class="home-logo"
-             alt="SDSU SD Standard Lockup"
+        <img src="/images/logo.png" class="home-logo"
+             alt="South Dakota Pest Monitoring Network Logo"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="home-logo-placeholder" style="display:none">SDSU SD Standard Lockup<br><span style="font-size:10px;font-weight:400">(drop SD-standard-lockup.avif in public/images/)</span></div>
+        <div class="home-logo-placeholder" style="display:none">SDSU Logo</div>
         <div>
           <div class="home-subtitle">South Dakota State University</div>
           <h1 class="home-title">South Dakota Pest Monitoring Network</h1>
@@ -390,6 +455,7 @@
 
   <!-- ═══ MAP PANEL ═══ -->
   <div id="map-panel" style="flex:1;position:relative;display:block">
+    <button id="mobile-filter-btn" onclick="openSidebar()">&#9776; Filters</button>
     <div id="map"></div>
     <div class="map-controls">
       <button class="map-btn" onclick="centerSD()">Center on SD</button>
@@ -470,6 +536,18 @@
 </div><!-- /.app-body -->
 
 <script>
+// ─── Mobile sidebar ───────────────────────────────────────────────────────────
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 const API       = '/api';
 const SD_CENTER = [44.3, -100.3];
@@ -707,6 +785,7 @@ function applyFilters() {
   loadTraps();
   analyticsLoaded = false;
   if (currentTab === 'interpolation') loadInterpolation();
+  if (window.innerWidth <= 768) closeSidebar();
 }
 
 function resetFilters() {
@@ -716,6 +795,7 @@ function resetFilters() {
   loadTraps();
   analyticsLoaded = false;
   if (currentTab === 'interpolation') loadInterpolation();
+  if (window.innerWidth <= 768) closeSidebar();
 }
 
 // ─── Tab switching ─────────────────────────────────────────────────────────────
